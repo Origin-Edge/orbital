@@ -90,7 +90,7 @@ jobs:
 
       - name: Build Orbital
         run: |
-          qmake CONFIG+=release orbital.pro -o build.mk
+          qmake CONFIG+=release QMAKE_APPLE_DEVICE_ARCHS="${{ matrix.archs }}" orbital.pro -o build.mk
           make -f build.mk -j"$(nproc)"
 
       - name: Bundle Qt into an AppImage
@@ -225,8 +225,29 @@ jobs:
             smoke-windows.png
 
   macos:
-    name: macOS (Apple Silicon)
-    runs-on: macos-latest
+    name: macOS (${{ matrix.arch_name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            arch: arm64
+            arch_name: "Apple Silicon"
+            dmg_name: "Orbital-macos-arm64.dmg"
+            archs: "arm64"
+          # macos-13 kaldırıldı; Intel makinesi artık macos-15-intel
+          - os: macos-15-intel
+            arch: x86_64
+            arch_name: "Intel x86_64"
+            dmg_name: "Orbital-macos-x86_64.dmg"
+            archs: "x86_64"
+          # Tek DMG her iki Mac'te: Qt'nin macOS paketi zaten evrensel, iki mimari birlikte derlenir
+          - os: macos-latest
+            arch: universal
+            arch_name: "Evrensel"
+            dmg_name: "Orbital-macos-universal.dmg"
+            archs: "x86_64 arm64"
     steps:
       - uses: actions/checkout@v4
 
@@ -244,17 +265,19 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QUICK_BACKEND: software
-          ORBITAL_SCREENSHOT: ${{ github.workspace }}/smoke-macos.png
+          ORBITAL_SCREENSHOT: ${{ github.workspace }}/smoke-macos-${{ matrix.arch }}.png
           ORBITAL_SCREENSHOT_DELAY: "4000"
         run: |
           perl -e 'alarm 60; exec @ARGV' build/Orbital.app/Contents/MacOS/Orbital
-          test -s smoke-macos.png
+          test -s smoke-macos-${{ matrix.arch }}.png
 
       - name: Package (bundle Qt)
         run: |
           macdeployqt build/Orbital.app -qmldir=resources/qml
           rm -rf build/Orbital.app/Contents/PlugIns/sqldrivers
           codesign --force --deep --sign - build/Orbital.app
+          lipo -archs build/Orbital.app/Contents/MacOS/Orbital
+          for a in ${{ matrix.archs }}; do lipo build/Orbital.app/Contents/MacOS/Orbital -verify_arch "$a"; done
           test -f build/Orbital.app/Contents/Resources/orbital.icns
           # Disk image with the usual "drag Orbital onto Applications" layout + "Yine de Aç" helper.
           mkdir -p dmg
@@ -262,18 +285,18 @@ jobs:
           ln -s /Applications dmg/Applications
           cp "scripts/macos-open-anyway.command" "dmg/Yine de Aç (İlk Çalıştırma).command"
           chmod +x "dmg/Yine de Aç (İlk Çalıştırma).command"
-          hdiutil create -volname Orbital -srcfolder dmg -ov -format UDZO Orbital-macos-arm64.dmg
+          hdiutil create -volname Orbital -srcfolder dmg -ov -format UDZO ${{ matrix.dmg_name }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: macos
+          name: macos-${{ matrix.arch }}
           path: |
-            Orbital-macos-arm64.dmg
-            smoke-macos.png
+            ${{ matrix.dmg_name }}
+            smoke-macos-${{ matrix.arch }}.png
 
   release:
     name: Release
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     needs: [linux, appimage, windows, macos]
     runs-on: ubuntu-latest
     steps:
@@ -284,9 +307,12 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'latest' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || 'Orbital Latest Build' }}
           files: |
             artifacts/linux/Orbital-x86_64.AppImage
             artifacts/linux/orbital-linux-x86_64.tar.gz
             artifacts/linux/Orbital-linux-amd64.deb
             artifacts/windows/Orbital-windows-x64.zip
-            artifacts/macos/Orbital-macos-arm64.dmg
+            artifacts/macos-arm64/Orbital-macos-arm64.dmg
+            artifacts/macos-x86_64/Orbital-macos-x86_64.dmg
