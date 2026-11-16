@@ -1,0 +1,55 @@
+name: Snap
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  snap:
+    name: Snap (orbital-ai)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: snapcore/action-build@v1
+        id: derle
+
+      - name: Snap'i kur ve aç (duman testi)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QUICK_BACKEND: software
+          ORBITAL_SCREENSHOT_DELAY: "4000"
+        run: |
+          sudo snap install --dangerous "${{ steps.derle.outputs.snap }}"
+          snap connections orbital-ai || true
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends xvfb dbus-x11
+          # snap run kullanıcı systemd'sine ihtiyaç duyar (dbus-run-session olmaz)
+          sudo loginctl enable-linger "$USER"
+          export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          for i in $(seq 1 30); do [ -S "$XDG_RUNTIME_DIR/bus" ] && break; sleep 1; done
+          export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+          ORBITAL_SCREENSHOT="$HOME/ekran-snap.png" timeout 120 snap run orbital-ai || true
+          test -s "$HOME/ekran-snap.png"
+          cp "$HOME/ekran-snap.png" .
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: snap
+          path: |
+            ${{ steps.derle.outputs.snap }}
+            ekran-snap.png
+          retention-days: 7
+
+      - name: Snap Store'a yükle (edge kanalı)
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        if: env.SNAPCRAFT_STORE_CREDENTIALS != ''
+        run: |
+          sudo snap install snapcraft --classic
+          snapcraft upload --release=edge "${{ steps.derle.outputs.snap }}"

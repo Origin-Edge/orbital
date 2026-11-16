@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=ORBITAL
+Comment=Türkçe yapay zekâ asistanı ve kodlama yardımcısı
+Exec=orbital-ai %U
+Icon=${SNAP}/meta/gui/orbital-ai.svg
+Categories=Development;Utility;
+Terminal=false
+StartupWMClass=orbital

@@ -1,0 +1,41 @@
+name: orbital-ai
+title: ORBITAL
+base: core24
+adopt-info: orbital
+summary: ORBITAL - Türkçe yapay zekâ asistanı ve kodlama yardımcısı
+description: |
+  Origin Edge'in Qt ile yazılmış masaüstü yapay zekâ uygulaması: sohbet,
+  ORBITAL Code kodlama yardımcısı, eklenti mağazası ve otomatik güncelleme
+  bildirimi. https://orbital.oedge.xyz
+website: https://orbital.oedge.xyz
+contact: destek@oedge.xyz
+license: Proprietary
+grade: stable
+confinement: strict
+platforms:
+  amd64:
+
+apps:
+  orbital-ai:
+    command: usr/bin/orbital
+    extensions: [kde-neon-6]
+    common-id: io.github.kefy266.orbital
+    plugs:
+      - network
+      - home
+      - removable-media
+
+parts:
+  orbital:
+    plugin: qmake
+    source: .
+    qmake-major-version: 6
+    qmake-parameters:
+      - CONFIG+=release
+    qmake-project-file: orbital.pro
+    override-pull: |
+      craftctl default
+      craftctl set version="$(python3 -c 'import json;print(json.load(open("version.json"))["version"])')"
+    override-build: |
+      craftctl default
+      install -Dm755 build/orbital "$CRAFT_PART_INSTALL/usr/bin/orbital"
