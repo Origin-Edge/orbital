@@ -1,36 +1,36 @@
 {
-  "version": "0.5.5",
-  "tag_name": "v0.5.5",
-  "name": "Orbital v0.5.5",
-  "body": "Mac: Intel ve evrensel (her iki işlemci) sürümleri; uygulama içi güncelleme Mac'in işlemcisine uygun DMG'yi indiriyor. Sağlayıcı hataları (Google, OpenAI, Anthropic…) artık sohbette kısa ve anlaşılır bir mesajla gösteriliyor; ham metin 'Ayrıntılar'da. Kota kilidi süresi Google'ın bildirdiği bekleme süresine göre ayarlanıyor.",
+  "version": "0.5.6",
+  "tag_name": "v0.5.6",
+  "name": "Orbital v0.5.6",
+  "body": "Klasör değiştirirken bazen başka klasörün açılması düzeltildi: hızlı geçişte ikinci bir motor sunucusu açılmıyor, proje listesinin sırası sabit kalıyor ve Kod moduna geçince en son kullandığın klasör açılıyor.",
   "assets": [
     {
       "name": "Orbital-x86_64.AppImage",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/Orbital-x86_64.AppImage"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/Orbital-x86_64.AppImage"
     },
     {
       "name": "Orbital-linux-amd64.deb",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/Orbital-linux-amd64.deb"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/Orbital-linux-amd64.deb"
     },
     {
       "name": "Orbital-windows-x64.zip",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/Orbital-windows-x64.zip"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/Orbital-windows-x64.zip"
     },
     {
       "name": "Orbital-macos-arm64.dmg",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/Orbital-macos-arm64.dmg"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/Orbital-macos-arm64.dmg"
     },
     {
       "name": "Orbital-macos-x86_64.dmg",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/Orbital-macos-x86_64.dmg"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/Orbital-macos-x86_64.dmg"
     },
     {
       "name": "Orbital-macos-universal.dmg",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/Orbital-macos-universal.dmg"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/Orbital-macos-universal.dmg"
     },
     {
       "name": "orbital-linux-x86_64.tar.gz",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.5/orbital-linux-x86_64.tar.gz"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.6/orbital-linux-x86_64.tar.gz"
     }
   ]
 }
