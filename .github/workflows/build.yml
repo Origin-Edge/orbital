@@ -90,7 +90,7 @@ jobs:
 
       - name: Build Orbital
         run: |
-          qmake CONFIG+=release QMAKE_APPLE_DEVICE_ARCHS="${{ matrix.archs }}" orbital.pro -o build.mk
+          qmake CONFIG+=release orbital.pro -o build.mk
           make -f build.mk -j"$(nproc)"
 
       - name: Bundle Qt into an AppImage
@@ -258,7 +258,7 @@ jobs:
 
       - name: Build Orbital
         run: |
-          qmake CONFIG+=release orbital.pro -o build.mk
+          qmake CONFIG+=release QMAKE_APPLE_DEVICE_ARCHS="${{ matrix.archs }}" orbital.pro -o build.mk
           make -f build.mk -j"$(sysctl -n hw.ncpu)"
 
       - name: Smoke test (UI loads offscreen)
