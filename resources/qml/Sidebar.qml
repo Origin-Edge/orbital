@@ -22,9 +22,7 @@ Rectangle {
         return q.length === 0 || title.toLowerCase().indexOf(q) >= 0 || project.toLowerCase().indexOf(q) >= 0
     }
     function openCode() {
-        if (root.codeProjects.length > 0)
-            App.openProjectPath(root.codeProjects[0].path)
-        else
+        if (!App.openCodeMode())
             folderDialog.open()
     }
 

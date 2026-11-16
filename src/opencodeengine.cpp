@@ -87,6 +87,7 @@ void OpencodeEngine::start(const QString &directory)
 {
     stop();
     m_stopping = false;
+    ++m_generation;
     m_directory = directory;
     if (QFile::exists(binaryPath()))
         launch();
@@ -110,9 +111,10 @@ void OpencodeEngine::install()
         if (total > 0)
             Q_EMIT statusMessage(tr("İlk kurulum yapılıyor… %1%").arg(got * 100 / total));
     });
-    connect(reply, &QNetworkReply::finished, this, [this, reply, targetDir] {
+    const int gen = m_generation;
+    connect(reply, &QNetworkReply::finished, this, [this, reply, targetDir, gen] {
         reply->deleteLater();
-        if (m_stopping)
+        if (m_stopping || gen != m_generation)
             return;
         if (reply->error() != QNetworkReply::NoError) {
             Q_EMIT failed(tr("Bulut modelleri hazırlanamadı. İnternet bağlantını kontrol edip tekrar dene."));
@@ -128,9 +130,11 @@ void OpencodeEngine::install()
         f.close();
         Q_EMIT statusMessage(tr("Kuruluyor…"));
         auto *tar = new QProcess(this);
-        connect(tar, &QProcess::finished, this, [this, tar, archive](int code) {
+        connect(tar, &QProcess::finished, this, [this, tar, archive, gen](int code) {
             tar->deleteLater();
             QFile::remove(archive);
+            if (m_stopping || gen != m_generation)
+                return;
             if (code != 0 || !QFile::exists(binaryPath())) {
                 Q_EMIT failed(tr("ORBITAL motoru kurulamadı: %1").arg(QString::fromUtf8(tar->readAllStandardError())));
                 return;
@@ -286,8 +290,9 @@ void OpencodeEngine::buildOverlay(std::function<void(const QByteArray &)> done)
 void OpencodeEngine::launch()
 {
     Q_EMIT statusMessage(tr("Hazırlanıyor…"));
-    buildOverlay([this](const QByteArray &overlay) {
-        if (m_stopping)
+    const int gen = m_generation;
+    buildOverlay([this, gen](const QByteArray &overlay) {
+        if (m_stopping || gen != m_generation)
             return;
         QTcpServer probe;
         probe.listen(QHostAddress::LocalHost, 0);
@@ -359,7 +364,10 @@ void OpencodeEngine::launch()
 
 void OpencodeEngine::onServerReady()
 {
-    call("GET", QStringLiteral("/agent"), {}, [this](const QJsonValue &data, const QString &) {
+    const int gen = m_generation;
+    call("GET", QStringLiteral("/agent"), {}, [this, gen](const QJsonValue &data, const QString &) {
+        if (gen != m_generation || !m_ready)
+            return;
         m_agents.clear();
         for (const QJsonValue &v : data.toArray()) {
             const QJsonObject a = v.toObject();

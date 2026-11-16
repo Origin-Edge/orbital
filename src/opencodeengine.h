@@ -82,6 +82,9 @@ private:
     QByteArray m_auth;
     bool m_ready = false;
     bool m_stopping = false;
+    // Bumped by every start(): async steps of an older start (download, overlay, /agent)
+    // see a different number and give up instead of launching a second server.
+    int m_generation = 0;
     QList<AgentInfo> m_agents;
 
     QSet<QString> m_userMessages;

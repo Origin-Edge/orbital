@@ -118,6 +118,8 @@ public:
     Q_INVOKABLE void setProject(const QUrl &folder);
     Q_INVOKABLE void openProjectPath(const QString &path);
     Q_INVOKABLE void openNoFolderProject();
+    // Kod mode: reopens the last code folder; false when there is none (ask for one).
+    Q_INVOKABLE bool openCodeMode();
     Q_INVOKABLE void removeRecentProject(const QString &path);
     QVariantList projects() const;
     QString projectFilter() const { return m_projectFilter; }
@@ -255,6 +257,7 @@ Q_SIGNALS:
     void scrollToEnd();
 
 private:
+    void rememberProject(const QString &dir);
     void reloadExtensions();
     void connectEngine();
     void onEngineReady();

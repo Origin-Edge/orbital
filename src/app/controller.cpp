@@ -684,16 +684,19 @@ void AppController::openSession(const QString &id)
     const QString sessionDir = m_sessions->directoryOf(id);
     if (!sessionDir.isEmpty() && sessionDir != m_directory && (sessionDir == Paths::noFolderDir() || QDir(sessionDir).exists())) {
         m_directory = sessionDir;
-        QJsonObject s = Paths::loadSettings();
-        s.insert(QStringLiteral("lastProject"), sessionDir);
-        Paths::saveSettings(s);
+        rememberProject(sessionDir);
         Q_EMIT projectChanged();
         Q_EMIT projectsChanged();
-        // The engine restarts for the other project: load the history once it is ready.
+        // The engine restarts for the other project (Sohbet and Kod may even use different
+        // engines): load the history once it is ready.
+        // (Set before starting: the native engine reports ready synchronously.)
         m_engineReady = false;
         m_pendingHistory = id;
         Q_EMIT engineChanged();
-        m_engine->start(m_directory);
+        if (m_engine->id() != preferredEngine())
+            switchEngine(preferredEngine());
+        else
+            m_engine->start(m_directory);
     }
 
     m_sessionId = id;
@@ -739,25 +742,51 @@ void AppController::setProject(const QUrl &folder)
     if (dir.isEmpty() || dir == m_directory)
         return;
     m_directory = dir;
-    QJsonObject s = Paths::loadSettings();
-    s.insert(QStringLiteral("lastProject"), dir);
-
-    QJsonArray recents = s.value(QStringLiteral("recentProjects")).toArray();
-    QStringList paths;
-    paths << dir;
-    for (const QJsonValue &v : recents) {
-        const QString p = v.toString();
-        if (p != dir && (p == Paths::noFolderDir() || QDir(p).exists()))
-            paths << p;
-    }
-    while (paths.size() > 20)
-        paths.removeLast();
-    s.insert(QStringLiteral("recentProjects"), QJsonArray::fromStringList(paths));
-    Paths::saveSettings(s);
+    rememberProject(dir);
 
     Q_EMIT projectChanged();
     Q_EMIT projectsChanged();
     switchEngine(preferredEngine());
+}
+
+// Saves the open folder. The recent list keeps its order (a folder you switch to doesn't
+// jump to the top, so the sidebar doesn't shift under the cursor); new folders go first.
+void AppController::rememberProject(const QString &dir)
+{
+    QJsonObject s = Paths::loadSettings();
+    s.insert(QStringLiteral("lastProject"), dir);
+    if (dir != Paths::noFolderDir())
+        s.insert(QStringLiteral("lastCodeProject"), dir);
+    QStringList paths;
+    for (const QJsonValue &v : s.value(QStringLiteral("recentProjects")).toArray()) {
+        const QString p = v.toString();
+        if (!paths.contains(p) && (p == Paths::noFolderDir() || QDir(p).exists()))
+            paths << p;
+    }
+    if (!paths.contains(dir))
+        paths.prepend(dir);
+    while (paths.size() > 20)
+        paths.removeLast();
+    s.insert(QStringLiteral("recentProjects"), QJsonArray::fromStringList(paths));
+    Paths::saveSettings(s);
+}
+
+bool AppController::openCodeMode()
+{
+    const QJsonObject s = Paths::loadSettings();
+    QString path = s.value(QStringLiteral("lastCodeProject")).toString();
+    if (path.isEmpty() || path == Paths::noFolderDir() || !QDir(path).exists()) {
+        path.clear();
+        for (const QVariant &v : projects())
+            if (!v.toMap().value(QStringLiteral("isNoFolder")).toBool()) {
+                path = v.toMap().value(QStringLiteral("path")).toString();
+                break;
+            }
+    }
+    if (path.isEmpty())
+        return false;
+    openProjectPath(path);
+    return true;
 }
 
 void AppController::openProjectPath(const QString &path)
@@ -822,13 +851,13 @@ QVariantList AppController::projects() const
         });
     };
 
-    if (!m_directory.isEmpty())
-        addProject(m_directory);
+    // Stable order (recent list, as saved): the open folder is marked, not moved.
     addProject(noFolder);
-
     const QJsonObject s = Paths::loadSettings();
     for (const QJsonValue &v : s.value(QStringLiteral("recentProjects")).toArray())
         addProject(v.toString());
+    if (!m_directory.isEmpty())
+        addProject(m_directory);
 
     for (auto it = counts.begin(); it != counts.end(); ++it)
         addProject(it.key());
