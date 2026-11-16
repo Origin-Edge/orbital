@@ -26,6 +26,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTextStream>
+#include <QSysInfo>
 #include <QTimer>
 #include <QUrl>
 #include <QUrlQuery>
@@ -2514,7 +2515,7 @@ void AppController::accountSignOut()
 QString AppController::appVersion() const
 {
     const QString ver = QCoreApplication::applicationVersion();
-    return ver.isEmpty() ? QStringLiteral("0.5.4") : ver;
+    return ver.isEmpty() ? QStringLiteral("0.5.5") : ver;
 }
 
 void AppController::checkForUpdates(bool silent)
@@ -2566,6 +2567,28 @@ void AppController::checkForUpdates(bool silent)
 
         if (newer) {
             const QJsonArray assets = obj.value(QStringLiteral("assets")).toArray();
+#if defined(Q_OS_MACOS)
+            // Several DMGs (arm64, x86_64, universal): take the one for this Mac's processor,
+            // then the universal one, then whatever DMG there is.
+            const QString cpu = QSysInfo::currentCpuArchitecture() == QLatin1String("arm64") ? QStringLiteral("arm64")
+                                                                                             : QStringLiteral("x86_64");
+            int bestRank = 0;
+            for (const QJsonValue &v : assets) {
+                const QJsonObject a = v.toObject();
+                const QString name = a.value(QStringLiteral("name")).toString().toLower();
+                if (!name.endsWith(QStringLiteral(".dmg")))
+                    continue;
+                const int rank = name.contains(QStringLiteral("-") + cpu + QStringLiteral(".dmg")) ? 3
+                               : name.contains(QStringLiteral("universal"))                       ? 2
+                               : (!name.contains(QStringLiteral("arm64")) && !name.contains(QStringLiteral("x86_64"))) ? 1
+                                                                                                    : 0;
+                if (rank > bestRank) {
+                    bestRank = rank;
+                    m_updateDownloadUrl = a.value(QStringLiteral("browser_download_url")).toString();
+                    m_updateAssetSize = a.value(QStringLiteral("size")).toInteger();
+                }
+            }
+#endif
             for (const QJsonValue &v : assets) {
                 const QJsonObject a = v.toObject();
                 const QString name = a.value(QStringLiteral("name")).toString();
@@ -2577,11 +2600,8 @@ void AppController::checkForUpdates(bool silent)
                     break;
                 }
 #elif defined(Q_OS_MACOS)
-                if (name.endsWith(QStringLiteral(".dmg"), Qt::CaseInsensitive)) {
-                    m_updateDownloadUrl = a.value(QStringLiteral("browser_download_url")).toString();
-                    m_updateAssetSize = a.value(QStringLiteral("size")).toInteger();
-                    break;
-                }
+                Q_UNUSED(name) // chosen above
+                break;
 #else
                 // A .deb install updates through the system package installer, everything else as an AppImage.
                 const bool deb = qEnvironmentVariable("ORBITAL_PACKAGE") == QLatin1String("deb");

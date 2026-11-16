@@ -316,3 +316,4 @@ jobs:
             artifacts/windows/Orbital-windows-x64.zip
             artifacts/macos-arm64/Orbital-macos-arm64.dmg
             artifacts/macos-x86_64/Orbital-macos-x86_64.dmg
+            artifacts/macos-universal/Orbital-macos-universal.dmg
