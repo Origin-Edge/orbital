@@ -32,6 +32,7 @@ public:
         ToolDetailsRole,
         ToolIconRole,
         LastInTurnRole,
+        DetailRole,
     };
 
     explicit ChatModel(QObject *parent = nullptr);
@@ -47,7 +48,10 @@ public:
     void appendReasoning(const QString &key, const QString &delta);
     void toolUpdate(const QString &id, const QString &name, const QJsonObject &input, const QString &status,
                     const QString &output);
-    void addError(const QString &text);
+    // Provider errors are shown as a short explanation; the raw text stays under "details".
+    void addError(const QString &text, const QString &modelName = {});
+    // Readable title + hint for a raw provider error, or an empty string when it isn't recognised.
+    static QString friendlyError(const QString &raw, const QString &modelName = {});
     void addHistory(const QJsonArray &items);
 
     // Plain text of an assistant turn ending at row (for "copy").
@@ -73,6 +77,7 @@ private:
         QString toolStatus;
         QString toolInput;
         QString toolOutput;
+        QString detail;
     };
 
     int indexOfKey(const QString &key) const;

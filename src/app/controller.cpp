@@ -351,6 +351,9 @@ void AppController::connectEngine()
     connect(e, &Engine::busyChanged, this, [this](const QString &sid, bool busy) { setBusyFor(sid, busy); });
     connect(e, &Engine::errorOccurred, this, [this](const QString &sid, const QString &message) {
         setBusyFor(sid, false);
+        // Name the model that failed before a quota lock switches to a fallback.
+        bool free = false;
+        const QString failedModel = m_modelRef.isEmpty() ? QString() : prettyModelName(m_modelRef.section(QLatin1Char('/'), 1), &free);
         if (isLimitOrQuotaError(message)) {
             lockModel(m_modelRef, message);
         }
@@ -363,7 +366,7 @@ void AppController::connectEngine()
         if (!isCurrent(sid))
             return;
         setThinking(false);
-        m_chat->addError(message);
+        m_chat->addError(message, failedModel);
     });
     connect(e, &Engine::permissionRequested, this, [this](const PermissionRequest &r) {
         m_permissionQueue << r;
@@ -1156,7 +1159,7 @@ static qint64 lockDurationMs(const QString &message)
     const QString l = message.toLower();
     qint64 ms = 0;
     static const QRegularExpression after(QStringLiteral("retry[ _-]?after\\D{0,4}(\\d+(?:\\.\\d+)?)"));
-    static const QRegularExpression tryIn(QStringLiteral("(?:try again in|retry ?delay\\W*)\\s*((?:\\d+(?:\\.\\d+)?\\s*(?:ms|h|m|s)\\s*)+)"));
+    static const QRegularExpression tryIn(QStringLiteral("(?:try again in|retry in|retry ?delay\\W*)\\s*((?:\\d+(?:\\.\\d+)?\\s*(?:ms|h|m|s)\\s*)+)"));
     static const QRegularExpression part(QStringLiteral("(\\d+(?:\\.\\d+)?)\\s*(ms|h|m|s)"));
     if (const auto m = after.match(l); m.hasMatch()) {
         ms = qint64(m.captured(1).toDouble() * 1000);

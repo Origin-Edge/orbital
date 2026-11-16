@@ -42,6 +42,7 @@ ListView {
         required property string toolDetails
         required property string toolIcon
         required property bool lastInTurn
+        required property string detail
 
         width: view.width
         height: loader.item ? loader.item.implicitHeight : 0
@@ -351,15 +352,56 @@ ListView {
                     anchors.margins: 12
                     spacing: 10
                     Icon { Layout.alignment: Qt.AlignTop; name: "alert"; size: 17; color: Theme.danger }
-                    TextEdit {
+                    ColumnLayout {
+                        id: ecol
                         Layout.fillWidth: true
-                        text: row.text
-                        readOnly: true
-                        selectByMouse: true
-                        wrapMode: TextEdit.Wrap
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontUi
-                        color: Theme.danger
+                        spacing: 4
+                        property bool showDetail: false
+                        // Readable errors come as "title\nhint"; the provider's raw text is in row.detail.
+                        readonly property bool friendly: row.detail.length > 0
+                        TextEdit {
+                            Layout.fillWidth: true
+                            text: ecol.friendly ? row.text.split("\n")[0] : row.text
+                            readOnly: true
+                            selectByMouse: true
+                            wrapMode: TextEdit.Wrap
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontUi
+                            font.weight: ecol.friendly ? Font.DemiBold : Font.Normal
+                            color: Theme.danger
+                        }
+                        TextEdit {
+                            visible: ecol.friendly
+                            Layout.fillWidth: true
+                            text: row.text.split("\n").slice(1).join("\n")
+                            readOnly: true
+                            selectByMouse: true
+                            wrapMode: TextEdit.Wrap
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontUi
+                            color: Theme.text
+                        }
+                        Text {
+                            visible: ecol.friendly
+                            text: ecol.showDetail ? "Ayrıntıları gizle" : "Ayrıntılar"
+                            font.family: Theme.font
+                            font.pixelSize: Theme.fontCaption
+                            color: Theme.textMuted
+                            font.underline: detailHover.hovered
+                            HoverHandler { id: detailHover; cursorShape: Qt.PointingHandCursor }
+                            TapHandler { onTapped: ecol.showDetail = !ecol.showDetail }
+                        }
+                        TextEdit {
+                            visible: ecol.friendly && ecol.showDetail
+                            Layout.fillWidth: true
+                            text: row.detail
+                            readOnly: true
+                            selectByMouse: true
+                            wrapMode: TextEdit.Wrap
+                            font.family: Theme.mono
+                            font.pixelSize: Theme.fontCaption
+                            color: Theme.textMuted
+                        }
                     }
                 }
             }
