@@ -6,4 +6,4 @@ Exec=orbital-ai %U
 Icon=${SNAP}/meta/gui/orbital-ai.svg
 Categories=Development;Utility;
 Terminal=false
-StartupWMClass=orbital
+StartupWMClass=orbital-ai_orbital-ai

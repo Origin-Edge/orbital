@@ -25,7 +25,10 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationName(QStringLiteral("Orbital"));
     QGuiApplication::setOrganizationName(QStringLiteral("Orbital"));
     QGuiApplication::setApplicationVersion(QStringLiteral("0.5.6"));
-    QGuiApplication::setDesktopFileName(QStringLiteral("orbital"));
+    // Snap'te menü girişi <snap>_<uygulama>.desktop; Wayland app_id aynı olmalı ki görev çubuğu simgeyi bulsun
+    const QString snapAdi = qEnvironmentVariable("SNAP_INSTANCE_NAME");
+    QGuiApplication::setDesktopFileName(snapAdi.isEmpty() ? QStringLiteral("orbital")
+                                                          : snapAdi + QStringLiteral("_orbital-ai"));
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/theme/orbital.svg")));
     if (QFontDatabase::families().contains(QStringLiteral("Inter")))
         QGuiApplication::setFont(QFont(QStringLiteral("Inter"), 10));
