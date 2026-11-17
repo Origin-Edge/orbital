@@ -142,7 +142,15 @@ void OpencodeEngine::install()
             QFile::setPermissions(binaryPath(), QFile::permissions(binaryPath()) | QFile::ExeOwner | QFile::ExeUser);
             launch();
         });
-        tar->start(QStringLiteral("tar"), {QStringLiteral("xzf"), archive, QStringLiteral("-C"), targetDir});
+        if (qEnvironmentVariableIsSet("SNAP")) {
+            // Snap içindeki GNU tar npm arşivlerini "Operation not permitted" ile açamıyor; Python tarfile açabiliyor.
+            tar->start(QStringLiteral("python3"),
+                       {QStringLiteral("-c"),
+                        QStringLiteral("import sys,tarfile; tarfile.open(sys.argv[1]).extractall(sys.argv[2], filter='data')"),
+                        archive, targetDir});
+        } else {
+            tar->start(QStringLiteral("tar"), {QStringLiteral("xzf"), archive, QStringLiteral("-C"), targetDir});
+        }
     });
 }
 
