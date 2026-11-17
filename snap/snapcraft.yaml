@@ -64,6 +64,9 @@ parts:
       cat > "$CRAFT_PART_INSTALL/bin/orbital-ai" <<'S'
       #!/bin/sh
       export PATH="$SNAP/opt/node/bin:$SNAP/usr/bin:$SNAP/bin:$PATH"
+      # Ubuntu git'i alt komutlarını (remote-https…) ve şablonlarını sabit /usr yolunda arar
+      export GIT_EXEC_PATH="$SNAP/usr/lib/git-core"
+      export GIT_TEMPLATE_DIR="$SNAP/usr/share/git-core/templates"
       exec "$SNAP/usr/bin/orbital" "$@"
       S
       chmod 755 "$CRAFT_PART_INSTALL/bin/orbital-ai"
