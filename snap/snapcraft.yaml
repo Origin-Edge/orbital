@@ -1,6 +1,7 @@
 name: orbital-ai
 title: ORBITAL
 base: core24
+icon: snap/gui/orbital-ai.svg
 adopt-info: orbital
 summary: ORBITAL - Türkçe yapay zekâ asistanı ve kodlama yardımcısı
 description: |
