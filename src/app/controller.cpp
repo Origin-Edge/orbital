@@ -2903,7 +2903,7 @@ void AppController::accountSignOut()
 QString AppController::appVersion() const
 {
     const QString ver = QCoreApplication::applicationVersion();
-    return ver.isEmpty() ? QStringLiteral("0.5.6") : ver;
+    return ver.isEmpty() ? QStringLiteral("0.5.7") : ver;
 }
 
 void AppController::checkForUpdates(bool silent)

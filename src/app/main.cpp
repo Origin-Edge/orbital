@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("Orbital"));
     QGuiApplication::setOrganizationName(QStringLiteral("Orbital"));
-    QGuiApplication::setApplicationVersion(QStringLiteral("0.5.6"));
+    QGuiApplication::setApplicationVersion(QStringLiteral("0.5.7"));
     // Snap'te menü girişi <snap>_<uygulama>.desktop; Wayland app_id aynı olmalı ki görev çubuğu simgeyi bulsun
     const QString snapAdi = qEnvironmentVariable("SNAP_INSTANCE_NAME");
     QGuiApplication::setDesktopFileName(snapAdi.isEmpty() ? QStringLiteral("orbital")
