@@ -18,7 +18,8 @@ platforms:
 
 apps:
   orbital-ai:
-    command: usr/bin/orbital
+    # Sarmalayıcı: paketteki araçlar (node, npx, rg, git) KDE ortamınınkilerden önce gelsin
+    command: bin/orbital-ai
     extensions: [kde-neon-6]
     common-id: io.github.kefy266.orbital
     plugs:
@@ -40,3 +41,29 @@ parts:
     override-build: |
       craftctl default
       install -Dm755 build/orbital "$CRAFT_PART_INSTALL/usr/bin/orbital"
+
+  # ORBITAL Code motorunun (opencode) ve araç komutlarının ihtiyaçları.
+  # Snap içinde GNU tar arşiv açamadığı için opencode'un ripgrep'i kendisi indirip açmasına bırakılmaz;
+  # KDE ortamındaki Ubuntu node 18 ise /usr/share/nodejs'e bağlı olduğundan snap'te çöker: resmi Node kullanılır.
+  araclar:
+    plugin: nil
+    stage-packages:
+      - ripgrep
+      - git
+    build-packages: [curl, xz-utils, ca-certificates]
+    override-build: |
+      craftctl default
+      SURUM=v22.21.1
+      OZET=680d3f30b24a7ff24b98db5e96f294c0070f8f9078df658da1bce1b9c9873c88
+      curl -fsSL -o node.tar.xz "https://nodejs.org/dist/$SURUM/node-$SURUM-linux-x64.tar.xz"
+      echo "$OZET  node.tar.xz" | sha256sum -c -
+      install -d "$CRAFT_PART_INSTALL/opt/node"
+      tar -xJf node.tar.xz -C "$CRAFT_PART_INSTALL/opt/node" --strip-components=1
+      rm -rf "$CRAFT_PART_INSTALL/opt/node/include" "$CRAFT_PART_INSTALL/opt/node/share/doc" "$CRAFT_PART_INSTALL/opt/node/share/man"
+      install -d "$CRAFT_PART_INSTALL/bin"
+      cat > "$CRAFT_PART_INSTALL/bin/orbital-ai" <<'S'
+      #!/bin/sh
+      export PATH="$SNAP/opt/node/bin:$SNAP/usr/bin:$SNAP/bin:$PATH"
+      exec "$SNAP/usr/bin/orbital" "$@"
+      S
+      chmod 755 "$CRAFT_PART_INSTALL/bin/orbital-ai"
