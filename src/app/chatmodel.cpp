@@ -558,6 +558,32 @@ QString ChatModel::turnText(int row) const
     return parts.join(QStringLiteral("\n\n"));
 }
 
+QString ChatModel::lastHtmlBlock() const
+{
+    static const QRegularExpression fence(QStringLiteral("```([A-Za-z0-9_+-]*)[^\\n]*\\n([\\s\\S]*?)```"));
+    for (int i = m_items.size() - 1; i >= 0; --i) {
+        if (m_items.at(i).kind != QLatin1String("text"))
+            continue;
+        QString html, loose;
+        auto it = fence.globalMatch(m_items.at(i).text);
+        while (it.hasNext()) {
+            const auto m = it.next();
+            const QString lang = m.captured(1).toLower();
+            const QString body = m.captured(2).trimmed();
+            if (lang == QLatin1String("html") || lang == QLatin1String("htm"))
+                html = body;  // aynı cevapta birden çok blok varsa sonuncusu
+            else if (body.contains(QLatin1String("<html"), Qt::CaseInsensitive)
+                     || body.contains(QLatin1String("<body"), Qt::CaseInsensitive))
+                loose = body;
+        }
+        if (!html.isEmpty())
+            return html;
+        if (!loose.isEmpty())
+            return loose;
+    }
+    return {};
+}
+
 QString ChatModel::lastUserPrompt() const
 {
     for (int i = m_items.size() - 1; i >= 0; --i) {

@@ -159,6 +159,12 @@ public:
     Q_INVOKABLE QString linkifyPlain(const QString &text) const;
     Q_INVOKABLE void retryEngine();
 
+    // sites.oedge.xyz'ye yayın (ORBITAL Web'deki "Yayınla" ile aynı uç; ORBITAL jetonuyla).
+    // Boş html: Sohbet'te son HTML yanıtı, Kod'da projenin index.html'i (yerel CSS/JS/görseller gömülür).
+    Q_INVOKABLE void publishSite(const QString &html = QString(), const QString &title = QString());
+    Q_PROPERTY(bool publishing READ publishing NOTIFY publishingChanged)
+    bool publishing() const { return m_publishing; }
+
     // Settings: skills
     Q_INVOKABLE QVariantList skillList() const;
     Q_INVOKABLE QString saveSkill(const QString &original, const QString &name, const QString &description,
@@ -247,6 +253,7 @@ Q_SIGNALS:
     void promptHistoryChanged();
     void themeModeChanged();
     void toast(const QString &message);
+    void publishingChanged();
     void providerResult(const QString &id, bool ok, const QString &message);
     void storeChanged();
     void storeItemDone(const QString &id, bool ok, const QString &message);
@@ -327,6 +334,8 @@ private:
     QString modelSettingKey() const;
     EdgeAccount *m_account = nullptr;
     bool handleSlashCommand(const QString &name, const QString &args);
+    QString projectSiteHtml(const QString &arg, QString *title, QString *error) const;
+    bool m_publishing = false;
 
     bool m_updateAvailable = false;
     QString m_updateVersion;

@@ -46,6 +46,31 @@ Rectangle {
                 font.pixelSize: Theme.fontCaption
                 color: Theme.textFaint
             }
+            // HTML bloğu: ORBITAL Web'deki gibi sites.oedge.xyz'de yayınla
+            AbstractButton {
+                id: publish
+                visible: ["html", "htm"].indexOf(block.lang.toLowerCase()) >= 0
+                enabled: !App.publishing
+                implicitHeight: 28
+                implicitWidth: publishRow.implicitWidth + 16
+                hoverEnabled: true
+                onClicked: App.publishSite(block.code, "")
+                background: Rectangle { radius: Theme.radiusSm; color: publish.hovered ? Theme.hover : "transparent" }
+                contentItem: Row {
+                    id: publishRow
+                    spacing: 6
+                    leftPadding: 8
+                    opacity: publish.enabled ? 1 : 0.5
+                    Icon { name: "globe"; size: 14; color: Theme.textMuted; anchors.verticalCenter: parent.verticalCenter }
+                    Text {
+                        text: App.publishing ? "Yayınlanıyor…" : "Yayınla"
+                        font.family: Theme.font
+                        font.pixelSize: Theme.fontCaption
+                        color: Theme.textMuted
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
             AbstractButton {
                 id: copy
                 property bool done: false

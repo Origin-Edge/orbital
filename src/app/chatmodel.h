@@ -57,6 +57,8 @@ public:
     // Plain text of an assistant turn ending at row (for "copy").
     Q_INVOKABLE QString turnText(int row) const;
     Q_INVOKABLE QString lastUserPrompt() const;
+    // Asistanın en son yazdığı tam HTML sayfası (```html bloğu ya da <html>/<body> içeren blok); yoksa boş.
+    Q_INVOKABLE QString lastHtmlBlock() const;
     Q_INVOKABLE QString exportMarkdown(const QString &sessionTitle, const QString &projectName) const;
 
     static QVariantList splitMarkdown(const QString &markdown);

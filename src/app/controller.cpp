@@ -18,6 +18,9 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
+#include <QJsonObject>
+#include <QHash>
+#include <QFileInfo>
 #include <QGuiApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -583,6 +586,8 @@ void AppController::refreshCommands()
             const char *name;
             const char *desc;
         } kBuiltins[] = {
+            {"yayinla", "Siteyi sites.oedge.xyz'de yayınla (Kod: projenin index.html'i, Sohbet: son HTML)"},
+            {"publish", "Siteyi sites.oedge.xyz'de yayınla (Kod: projenin index.html'i, Sohbet: son HTML)"},
             {"yardim", "Tüm / komutlarını ve özellikleri listele"},
             {"help", "Tüm / komutlarını ve özellikleri listele"},
             {"temizle", "Sohbeti temizle ve yeni oturum başlat"},
@@ -1376,9 +1381,286 @@ void AppController::unlockAllModels()
     syncLockFlags();
 }
 
+// ---------------------------------------------------------------- sites.oedge.xyz'ye yayın
+
+namespace {
+
+QString webBaseUrl()
+{
+    return qEnvironmentVariable("ORBITAL_WEB_URL", QStringLiteral("https://yz.oedge.xyz"));
+}
+
+bool isLocalRef(const QString &ref)
+{
+    const QString r = ref.trimmed();
+    return !r.isEmpty() && !r.startsWith(QLatin1Char('#')) && !r.contains(QLatin1String("://"))
+           && !r.startsWith(QLatin1String("//")) && !r.startsWith(QLatin1String("data:"))
+           && !r.startsWith(QLatin1String("mailto:")) && !r.startsWith(QLatin1String("javascript:"));
+}
+
+// Göreli yolu base'e göre çözer; proje kökünün dışına çıkmaya izin vermez.
+QString resolveLocal(const QDir &base, const QString &root, const QString &ref)
+{
+    QString clean = ref.trimmed();
+    clean = clean.section(QLatin1Char('?'), 0, 0).section(QLatin1Char('#'), 0, 0);
+    clean = QUrl::fromPercentEncoding(clean.toUtf8());
+    const QString path = QDir::cleanPath(clean.startsWith(QLatin1Char('/')) ? root + clean : base.absoluteFilePath(clean));
+    if (!path.startsWith(QDir::cleanPath(root) + QLatin1Char('/')) || !QFileInfo(path).isFile())
+        return {};
+    return path;
+}
+
+QString mimeFor(const QString &path)
+{
+    static const QHash<QString, QString> m{
+        {QStringLiteral("png"), QStringLiteral("image/png")},   {QStringLiteral("jpg"), QStringLiteral("image/jpeg")},
+        {QStringLiteral("jpeg"), QStringLiteral("image/jpeg")}, {QStringLiteral("gif"), QStringLiteral("image/gif")},
+        {QStringLiteral("svg"), QStringLiteral("image/svg+xml")}, {QStringLiteral("webp"), QStringLiteral("image/webp")},
+        {QStringLiteral("avif"), QStringLiteral("image/avif")}, {QStringLiteral("ico"), QStringLiteral("image/x-icon")},
+        {QStringLiteral("woff"), QStringLiteral("font/woff")},  {QStringLiteral("woff2"), QStringLiteral("font/woff2")},
+        {QStringLiteral("ttf"), QStringLiteral("font/ttf")},    {QStringLiteral("otf"), QStringLiteral("font/otf")},
+        {QStringLiteral("mp3"), QStringLiteral("audio/mpeg")},  {QStringLiteral("mp4"), QStringLiteral("video/mp4")},
+    };
+    return m.value(QFileInfo(path).suffix().toLower());
+}
+
+// 2 MB'a kadar görsel/yazı tipini data: adresine çevirir; büyük ya da bilinmeyen dosya için boş döner.
+QString dataUri(const QString &path)
+{
+    const QString mime = mimeFor(path);
+    QFile f(path);
+    if (mime.isEmpty() || f.size() > 2 * 1024 * 1024 || !f.open(QIODevice::ReadOnly))
+        return {};
+    return QStringLiteral("data:%1;base64,%2").arg(mime, QString::fromLatin1(f.readAll().toBase64()));
+}
+
+// CSS içindeki url(...) başvurularını gömer.
+QString inlineCssUrls(const QString &css, const QDir &base, const QString &root)
+{
+    static const QRegularExpression urlRe(QStringLiteral("url\\(\\s*(['\"]?)([^'\")]+)\\1\\s*\\)"));
+    QString out;
+    qsizetype last = 0;
+    auto it = urlRe.globalMatch(css);
+    while (it.hasNext()) {
+        const auto m = it.next();
+        out += css.mid(last, m.capturedStart() - last);
+        const QString ref = m.captured(2);
+        const QString path = isLocalRef(ref) ? resolveLocal(base, root, ref) : QString();
+        const QString uri = path.isEmpty() ? QString() : dataUri(path);
+        out += uri.isEmpty() ? m.captured(0) : QStringLiteral("url(\"%1\")").arg(uri);
+        last = m.capturedEnd();
+    }
+    return out + css.mid(last);
+}
+
+QString readText(const QString &path)
+{
+    QFile f(path);
+    return f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()) : QString();
+}
+
+} // namespace
+
+// Kod: projenin sayfasını tek bir HTML'de toplar (sites.oedge.xyz tek index.html barındırır).
+QString AppController::projectSiteHtml(const QString &arg, QString *title, QString *error) const
+{
+    const QString root = QDir::cleanPath(m_directory);
+    QString file;
+    if (!arg.isEmpty()) {
+        file = resolveLocal(QDir(root), root, arg);
+        if (file.isEmpty()) {
+            *error = QStringLiteral("`%1` projede bulunamadı.").arg(arg);
+            return {};
+        }
+    } else {
+        for (const QString &c : {QStringLiteral("index.html"), QStringLiteral("dist/index.html"), QStringLiteral("build/index.html"),
+                                 QStringLiteral("public/index.html"), QStringLiteral("out/index.html"), QStringLiteral("site/index.html"),
+                                 QStringLiteral("docs/index.html")}) {
+            if (QFileInfo(root + QLatin1Char('/') + c).isFile()) {
+                file = root + QLatin1Char('/') + c;
+                break;
+            }
+        }
+        if (file.isEmpty()) {
+            *error = QStringLiteral("Projede `index.html` yok. Yayınlanacak dosyayı yaz: `/yayinla sayfa.html`");
+            return {};
+        }
+    }
+    if (QFileInfo(file).size() > 8 * 1024 * 1024) {
+        *error = QStringLiteral("`%1` çok büyük (8 MB sınırı).").arg(QDir(root).relativeFilePath(file));
+        return {};
+    }
+    const QDir base = QFileInfo(file).absoluteDir();
+    QString html = readText(file);
+
+    // <link rel="stylesheet" href="yerel.css"> -> <style>…</style>
+    static const QRegularExpression linkRe(QStringLiteral("<link\\b[^>]*>"), QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression hrefRe(QStringLiteral("href\\s*=\\s*(['\"])([^'\"]+)\\1"), QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression relRe(QStringLiteral("rel\\s*=\\s*(['\"]?)([^'\" >]+)"), QRegularExpression::CaseInsensitiveOption);
+    QString out;
+    qsizetype last = 0;
+    auto it = linkRe.globalMatch(html);
+    while (it.hasNext()) {
+        const auto m = it.next();
+        out += html.mid(last, m.capturedStart() - last);
+        last = m.capturedEnd();
+        const QString tag = m.captured(0);
+        const QString href = hrefRe.match(tag).captured(2);
+        const QString rel = relRe.match(tag).captured(2).toLower();
+        const QString path = isLocalRef(href) ? resolveLocal(base, root, href) : QString();
+        if (!path.isEmpty() && rel == QLatin1String("stylesheet")) {
+            out += QStringLiteral("<style>\n%1\n</style>").arg(inlineCssUrls(readText(path), QFileInfo(path).absoluteDir(), root));
+        } else if (!path.isEmpty() && rel.contains(QLatin1String("icon"))) {
+            const QString uri = dataUri(path);
+            out += uri.isEmpty() ? tag : QString(tag).replace(href, uri);
+        } else {
+            out += tag;
+        }
+    }
+    html = out + html.mid(last);
+
+    // <script src="yerel.js"></script> -> <script>…</script>
+    static const QRegularExpression scriptRe(QStringLiteral("<script\\b([^>]*?)\\ssrc\\s*=\\s*(['\"])([^'\"]+)\\2([^>]*)>\\s*</script>"),
+                                             QRegularExpression::CaseInsensitiveOption);
+    out.clear();
+    last = 0;
+    it = scriptRe.globalMatch(html);
+    while (it.hasNext()) {
+        const auto m = it.next();
+        out += html.mid(last, m.capturedStart() - last);
+        last = m.capturedEnd();
+        const QString src = m.captured(3);
+        const QString path = isLocalRef(src) ? resolveLocal(base, root, src) : QString();
+        if (path.isEmpty()) {
+            out += m.captured(0);
+            continue;
+        }
+        QString js = readText(path);
+        js.replace(QLatin1String("</script"), QLatin1String("<\\/script"), Qt::CaseInsensitive);
+        out += QStringLiteral("<script%1%2>\n%3\n</script>").arg(m.captured(1), m.captured(4), js);
+    }
+    html = out + html.mid(last);
+
+    // <img src="yerel.png">, <source src=…>, poster=… -> data: adresi; satır içi style="…url()…" de
+    static const QRegularExpression attrRe(QStringLiteral("\\b(src|poster)\\s*=\\s*(['\"])([^'\"]+)\\2"),
+                                           QRegularExpression::CaseInsensitiveOption);
+    out.clear();
+    last = 0;
+    it = attrRe.globalMatch(html);
+    while (it.hasNext()) {
+        const auto m = it.next();
+        out += html.mid(last, m.capturedStart() - last);
+        last = m.capturedEnd();
+        const QString ref = m.captured(3);
+        const QString path = isLocalRef(ref) ? resolveLocal(base, root, ref) : QString();
+        const QString uri = path.isEmpty() ? QString() : dataUri(path);
+        out += uri.isEmpty() ? m.captured(0) : QStringLiteral("%1=\"%2\"").arg(m.captured(1), uri);
+    }
+    html = inlineCssUrls(out + html.mid(last), base, root);
+
+    static const QRegularExpression titleRe(QStringLiteral("<title[^>]*>([^<]*)</title>"), QRegularExpression::CaseInsensitiveOption);
+    *title = titleRe.match(html).captured(1).trimmed();
+    if (title->isEmpty())
+        *title = QFileInfo(root).fileName();
+    return html;
+}
+
+void AppController::publishSite(const QString &htmlIn, const QString &titleIn)
+{
+    if (m_publishing)
+        return;
+    const QString token = EdgeAccount::token();
+    if (token.isEmpty()) {
+        m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
+                        QStringLiteral("Site yayınlamak için önce **EdgeAccount ile giriş yap** (sol alttaki hesap düğmesi)."));
+        Q_EMIT scrollToEnd();
+        return;
+    }
+
+    QString html = htmlIn.trimmed(), title = titleIn.trimmed(), error;
+    if (html.isEmpty()) {
+        if (isNoFolder()) {
+            html = m_chat->lastHtmlBlock();
+            if (html.isEmpty())
+                error = QStringLiteral("Bu sohbette yayınlanacak bir HTML sayfası yok. Önce ORBITAL'a bir sayfa yazdır "
+                                       "(örn. *\"kahve dükkânım için tek sayfalık site yap\"*), sonra `/yayinla` yaz.");
+        } else {
+            html = projectSiteHtml(QString(), &title, &error);
+        }
+    }
+    if (html.isEmpty()) {
+        m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), error);
+        Q_EMIT scrollToEnd();
+        return;
+    }
+    if (html.size() > 20 * 1024 * 1024) {
+        Q_EMIT toast(QStringLiteral("Sayfa 20 MB'tan büyük; yayınlanamadı."));
+        return;
+    }
+    if (title.isEmpty()) {
+        static const QRegularExpression titleRe(QStringLiteral("<title[^>]*>([^<]*)</title>"), QRegularExpression::CaseInsensitiveOption);
+        title = titleRe.match(html).captured(1).trimmed();
+    }
+
+    m_publishing = true;
+    Q_EMIT publishingChanged();
+    Q_EMIT toast(QStringLiteral("Yayınlanıyor…"));
+    QNetworkRequest req(QUrl(webBaseUrl() + QStringLiteral("/api/publish-site")));
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
+    req.setRawHeader("Authorization", "Bearer " + token.toUtf8());
+    req.setTransferTimeout(60000);
+    QNetworkReply *reply = m_nam->post(req, QJsonDocument(QJsonObject{{QStringLiteral("code"), html},
+                                                                      {QStringLiteral("title"), title.left(120)}})
+                                                 .toJson(QJsonDocument::Compact));
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        m_publishing = false;
+        Q_EMIT publishingChanged();
+        const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const QJsonObject o = QJsonDocument::fromJson(reply->readAll()).object();
+        const QString key = QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch());
+        if (status == 200 && o.value(QStringLiteral("success")).toBool()) {
+            const QString url = o.value(QStringLiteral("url")).toString();
+            copyText(url);
+            m_chat->setText(key, QStringLiteral("### 🌐 Site yayında\n\n**[%1](%1)**\n\n"
+                                                "Adres panoya kopyalandı. Her yayın yeni bir numara alır; "
+                                                "değişiklikten sonra `/yayinla` ile yeniden yayınlayabilirsin.")
+                                     .arg(url));
+            Q_EMIT toast(QStringLiteral("Yayınlandı: %1").arg(url));
+        } else {
+            QString msg = o.value(QStringLiteral("error")).toString();
+            if (status == 401)
+                msg = QStringLiteral("Oturumun geçersiz; EdgeAccount ile yeniden giriş yap.");
+            else if (msg.isEmpty())
+                msg = reply->errorString();
+            m_chat->setText(key, QStringLiteral("Yayınlanamadı: %1").arg(msg));
+            Q_EMIT toast(QStringLiteral("Yayınlanamadı"));
+        }
+        Q_EMIT scrollToEnd();
+    });
+}
+
 bool AppController::handleSlashCommand(const QString &name, const QString &args)
 {
     const QString cmd = name.toLower();
+
+    // /yayinla, /publish: sites.oedge.xyz'ye yayınla
+    if (cmd == QLatin1String("yayinla") || cmd == QStringLiteral("yayınla") || cmd == QLatin1String("publish")) {
+        m_chat->addUser(QStringLiteral("/") + name + (args.isEmpty() ? QString() : QLatin1Char(' ') + args), {});
+        Q_EMIT scrollToEnd();
+        if (!isNoFolder() && !args.isEmpty()) {
+            QString title, error;
+            const QString html = projectSiteHtml(args, &title, &error);
+            if (html.isEmpty()) {
+                m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), error);
+                return true;
+            }
+            publishSite(html, title);
+        } else {
+            publishSite();
+        }
+        return true;
+    }
 
     // 1. /yardim, /help
     if (cmd == QLatin1String("yardim") || cmd == QLatin1String("help")) {
@@ -1389,6 +1671,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
             "| Komut | Açıklama |\n"
             "| :--- | :--- |\n"
             "| `/yardim`, `/help` | Tüm kullanılabilir / komutlarını listeler |\n"
+            "| `/yayinla`, `/publish [dosya]` | Siteyi **sites.oedge.xyz** adresinde yayınlar (Kod: projenin `index.html` dosyası, yerel CSS/JS/görseller gömülür; Sohbet: son HTML yanıtı) |\n"
             "| `/temizle`, `/clear` | Sohbeti temizler ve yeni bir oturum başlatır |\n"
             "| `/model [isim]` | Aktif modeli gösterir veya hızlıca değiştirir (Örn: `/model deepseek`) |\n"
             "| `/models` | Tüm modelleri, ücretsiz (✨) ve kilit (🔒) durumlarını listeler |\n"
