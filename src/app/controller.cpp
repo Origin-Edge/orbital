@@ -216,7 +216,34 @@ void AppController::setBusyFor(const QString &sid, bool busy)
         if (!busy)
             setThinking(false);
         Q_EMIT busyChanged();
+        if (!busy && !m_kuyruk.isEmpty())
+            QTimer::singleShot(400, this, &AppController::sirayiIlerlet);
     }
+}
+
+void AppController::sirayiIlerlet()
+{
+    if (m_kuyruk.isEmpty() || busy() || m_tekrarBekliyor)
+        return;
+    const QString sonraki = m_kuyruk.takeFirst();
+    Q_EMIT queueChanged();
+    submit(sonraki);
+}
+
+void AppController::removeQueued(int index)
+{
+    if (index < 0 || index >= m_kuyruk.size())
+        return;
+    m_kuyruk.removeAt(index);
+    Q_EMIT queueChanged();
+}
+
+void AppController::clearQueue()
+{
+    if (m_kuyruk.isEmpty())
+        return;
+    m_kuyruk.clear();
+    Q_EMIT queueChanged();
 }
 
 // ---------------------------------------------------------------- engines
@@ -232,6 +259,8 @@ void AppController::switchEngine(const QString &id)
     m_sessionId.clear();
     m_sessionTitle.clear();
     m_queued.clear();
+    m_kuyruk.clear();
+    Q_EMIT queueChanged();
     m_busy.clear();
     m_models.clear();
     m_modelRef.clear();
@@ -366,10 +395,14 @@ void AppController::connectEngine()
             if (isCurrent(sid) && m_modelRef != onceki && !m_lockedModels.contains(m_modelRef) && m_otoTekrar < 3) {
                 ++m_otoTekrar;
                 setThinking(false);
+                m_tekrarBekliyor = true;
                 QTimer::singleShot(800, this, [this] {
+                    m_tekrarBekliyor = false;
                     const QString prompt = m_chat->lastUserPrompt();
-                    if (prompt.isEmpty() || busy())
+                    if (prompt.isEmpty() || busy()) {
+                        sirayiIlerlet();
                         return;
+                    }
                     m_otoGonderim = true;
                     submit(prompt);
                     m_otoGonderim = false;
@@ -684,6 +717,7 @@ void AppController::refreshSessions()
 
 void AppController::newChat()
 {
+    clearQueue();  // sıradaki mesajlar önceki sohbete aitti
     m_sessionId.clear();
     m_sessionTitle.clear();
     m_chat->clear();
@@ -701,6 +735,7 @@ void AppController::openSession(const QString &id)
 {
     if (!m_engine || id == m_sessionId)
         return;
+    clearQueue();  // sıradaki mesajlar önceki sohbete aitti
 
     const QString sessionDir = m_sessions->directoryOf(id);
     if (!sessionDir.isEmpty() && sessionDir != m_directory && (sessionDir == Paths::noFolderDir() || QDir(sessionDir).exists())) {
@@ -891,6 +926,12 @@ void AppController::submit(const QString &rawText)
     const QString trimmed = rawText.trimmed();
     if (trimmed.isEmpty())
         return;
+    if (busy() && !m_otoGonderim) {
+        m_kuyruk << trimmed;
+        Q_EMIT queueChanged();
+        Q_EMIT toast(QStringLiteral("Sıraya alındı (%1). Şu anki iş bitince gönderilecek.").arg(m_kuyruk.size()));
+        return;
+    }
     if (!m_otoGonderim)
         m_otoTekrar = 0;
 

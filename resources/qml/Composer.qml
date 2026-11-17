@@ -21,7 +21,7 @@ Item {
     function send() {
         if (slash.visible && slash.count > 0) { slash.accept(); return }
         const t = input.text.trim()
-        if (!t.length || App.busy)
+        if (!t.length)  // model çalışıyorsa App.submit mesajı sıraya alır
             return
         historyIndex = -1
         currentDraft = ""
@@ -78,6 +78,56 @@ Item {
             anchors.leftMargin: 12
             anchors.rightMargin: 10
             spacing: 6
+
+            // Sıradaki mesajlar: model işini bitirince sırayla gönderilir
+            Column {
+                Layout.fillWidth: true
+                Layout.leftMargin: 4
+                Layout.topMargin: 2
+                spacing: 4
+                visible: App.queuedMessages.length > 0
+                Repeater {
+                    model: App.queuedMessages
+                    delegate: Rectangle {
+                        required property string modelData
+                        required property int index
+                        width: parent.width
+                        height: 34
+                        radius: Theme.radiusSm
+                        color: Theme.hover
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 2
+                            spacing: 8
+                            Text {
+                                text: "Sırada " + (index + 1)
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontCaption
+                                font.weight: Font.Medium
+                                color: Theme.accent
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                text: modelData.replace(/\s+/g, " ")
+                                elide: Text.ElideRight
+                                maximumLineCount: 1
+                                textFormat: Text.PlainText
+                                font.family: Theme.font
+                                font.pixelSize: Theme.fontCaption + 1
+                                color: Theme.textMuted
+                            }
+                            IconButton {
+                                iconName: "x"
+                                iconSize: 14
+                                tip: "Sıradan çıkar"
+                                onClicked: App.removeQueued(index)
+                            }
+                        }
+                    }
+                }
+            }
 
             Flow {
                 Layout.fillWidth: true

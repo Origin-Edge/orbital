@@ -163,6 +163,11 @@ public:
     // Boş html: Sohbet'te son HTML yanıtı, Kod'da projenin index.html'i (yerel CSS/JS/görseller gömülür).
     Q_INVOKABLE void publishSite(const QString &html = QString(), const QString &title = QString());
     Q_PROPERTY(bool publishing READ publishing NOTIFY publishingChanged)
+    // Model çalışırken gönderilen mesajlar sıraya girer; iş bitince sırayla gönderilir.
+    Q_PROPERTY(QStringList queuedMessages READ queuedMessages NOTIFY queueChanged)
+    QStringList queuedMessages() const { return m_kuyruk; }
+    Q_INVOKABLE void removeQueued(int index);
+    Q_INVOKABLE void clearQueue();
     bool publishing() const { return m_publishing; }
 
     // Settings: skills
@@ -254,6 +259,7 @@ Q_SIGNALS:
     void themeModeChanged();
     void toast(const QString &message);
     void publishingChanged();
+    void queueChanged();
     void providerResult(const QString &id, bool ok, const QString &message);
     void storeChanged();
     void storeItemDone(const QString &id, bool ok, const QString &message);
@@ -338,6 +344,9 @@ private:
     bool m_publishing = false;
     int m_otoTekrar = 0;          // kota dolunca yedek modelle otomatik yeniden gönderim sayısı
     bool m_otoGonderim = false;
+    QStringList m_kuyruk;          // sıradaki mesajlar
+    bool m_tekrarBekliyor = false;  // kota sonrası otomatik yeniden gönderim bekleniyor: sıra beklesin
+    void sirayiIlerlet();
 
     bool m_updateAvailable = false;
     QString m_updateVersion;
