@@ -263,6 +263,7 @@ ListView {
                         implicitHeight: 44
                         hoverEnabled: true
                         onClicked: tcard.open = !tcard.open
+                        clip: true
                         background: Item {}
                         contentItem: RowLayout {
                             spacing: 10
@@ -274,14 +275,20 @@ ListView {
                             }
                             Text {
                                 text: row.toolTitle
+                                maximumLineCount: 1
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontUi
                                 font.weight: Font.Medium
                                 color: Theme.text
                             }
                             Text {
-                                text: row.toolSubtitle
+                                // Çok satırlı komutlar tek satıra indirilir; tamamı kart açılınca ayrıntıda görünür
+                                text: row.toolSubtitle.replace(/\s+/g, " ").trim()
                                 Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                maximumLineCount: 1
+                                wrapMode: Text.NoWrap
+                                textFormat: Text.PlainText
                                 elide: Text.ElideMiddle
                                 font.family: Theme.mono
                                 font.pixelSize: Theme.fontCaption + 1
