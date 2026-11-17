@@ -359,7 +359,23 @@ void AppController::connectEngine()
         bool free = false;
         const QString failedModel = m_modelRef.isEmpty() ? QString() : prettyModelName(m_modelRef.section(QLatin1Char('/'), 1), &free);
         if (isLimitOrQuotaError(message)) {
+            const QString onceki = m_modelRef;
             lockModel(m_modelRef, message);
+            // Yedek modele geçilebildiyse hata gösterilmez; aynı mesaj yeni modelle yeniden gönderilir.
+            // Sonsuz döngü olmasın diye bir kullanıcı mesajı başına en çok 3 deneme.
+            if (isCurrent(sid) && m_modelRef != onceki && !m_lockedModels.contains(m_modelRef) && m_otoTekrar < 3) {
+                ++m_otoTekrar;
+                setThinking(false);
+                QTimer::singleShot(800, this, [this] {
+                    const QString prompt = m_chat->lastUserPrompt();
+                    if (prompt.isEmpty() || busy())
+                        return;
+                    m_otoGonderim = true;
+                    submit(prompt);
+                    m_otoGonderim = false;
+                });
+                return;
+            }
         }
         if (message.contains(QLatin1String("UNIQUE constraint failed")) || message.contains(QLatin1String("SQLiteError"))) {
             if (sid == m_sessionId) {
@@ -875,6 +891,8 @@ void AppController::submit(const QString &rawText)
     const QString trimmed = rawText.trimmed();
     if (trimmed.isEmpty())
         return;
+    if (!m_otoGonderim)
+        m_otoTekrar = 0;
 
     m_promptHistory.removeAll(trimmed);
     m_promptHistory.append(trimmed);
@@ -964,7 +982,8 @@ void AppController::submit(const QString &rawText)
 
 void AppController::dispatch(const QString &text, const QStringList &skills)
 {
-    m_chat->addUser(text, skills);
+    if (!m_otoGonderim)  // kota sonrası otomatik yeniden gönderimde mesaj sohbette zaten var
+        m_chat->addUser(text, skills);
     setThinking(true);
     setBusyFor(m_sessionId, true); // before dispatching: a synchronous failure must be able to clear it
     Q_EMIT scrollToEnd();
@@ -1290,22 +1309,38 @@ void AppController::expireLocks()
 // First usable model after a lock: free OpenCode models, then cheap fast models, then anything unlocked.
 QString AppController::fallbackModel() const
 {
-    static const QStringList kPreferred{
-        QStringLiteral("opencode/deepseek-v4.1-flash-free"),
-        QStringLiteral("opencode/big-pickle"),
-        QStringLiteral("gemini/gemini-3.5-flash"),
-        QStringLiteral("gemini/gemini-3.5-flash-lite"),
-        QStringLiteral("gemini/gemini-3-flash-preview"),
-        QStringLiteral("gemini/gemini-3.1-flash-lite"),
-    };
-    QStringList available;
+    // Kota dolunca sıra: opencode'un diğer ücretsiz modelleri -> ORBITAL'ın kendi modelleri (geliştirici
+    // hesabında kotasız; sunucu tarafında da kendi içinde yedek zinciri var) -> Gemini -> kalan her şey.
+    auto acik = [this](const QString &r) { return !r.isEmpty() && !m_lockedModels.contains(r); };
+    QStringList refs;
     for (const QVariant &v : m_models)
-        available << v.toMap().value(QStringLiteral("ref")).toString();
-    for (const QString &pref : kPreferred)
-        if (available.contains(pref) && !m_lockedModels.contains(pref))
-            return pref;
-    for (const QString &r : std::as_const(available))
-        if (!r.isEmpty() && !m_lockedModels.contains(r))
+        refs << v.toMap().value(QStringLiteral("ref")).toString();
+
+    static const QStringList kOncelikli{QStringLiteral("opencode/deepseek-v4.1-flash-free"), QStringLiteral("opencode/big-pickle")};
+    for (const QString &r : kOncelikli)
+        if (refs.contains(r) && acik(r))
+            return r;
+    for (const QVariant &v : m_models) {
+        const QVariantMap m = v.toMap();
+        const QString r = m.value(QStringLiteral("ref")).toString();
+        if (r.startsWith(QLatin1String("opencode/")) && m.value(QStringLiteral("free")).toBool() && acik(r))
+            return r;
+    }
+    static const QStringList kOrbital{QStringLiteral("orbital/gpt-oss-120b"), QStringLiteral("orbital/qwen3.8-27b"),
+                                      QStringLiteral("orbital/gpt-oss-20b")};
+    for (const QString &r : kOrbital)
+        if (refs.contains(r) && acik(r))
+            return r;
+    for (const QString &r : std::as_const(refs))
+        if (r.startsWith(QLatin1String("orbital/")) && acik(r))
+            return r;
+    static const QStringList kGemini{QStringLiteral("gemini/gemini-3.5-flash"), QStringLiteral("gemini/gemini-3.5-flash-lite"),
+                                     QStringLiteral("gemini/gemini-3-flash-preview"), QStringLiteral("gemini/gemini-3.1-flash-lite")};
+    for (const QString &r : kGemini)
+        if (refs.contains(r) && acik(r))
+            return r;
+    for (const QString &r : std::as_const(refs))
+        if (acik(r))
             return r;
     return {};
 }

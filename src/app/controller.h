@@ -336,6 +336,8 @@ private:
     bool handleSlashCommand(const QString &name, const QString &args);
     QString projectSiteHtml(const QString &arg, QString *title, QString *error) const;
     bool m_publishing = false;
+    int m_otoTekrar = 0;          // kota dolunca yedek modelle otomatik yeniden gönderim sayısı
+    bool m_otoGonderim = false;
 
     bool m_updateAvailable = false;
     QString m_updateVersion;
