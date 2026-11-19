@@ -2,6 +2,7 @@
 
 #include "chatmodel.h"
 #include "controller.h"
+#include "canli.h"
 #include "iconprovider.h"
 
 #include <QFontDatabase>
@@ -36,6 +37,8 @@ int main(int argc, char *argv[])
 
     AppController controller;
     qmlRegisterSingletonInstance("Orbital", 1, 0, "App", &controller);
+    Canli canli;
+    qmlRegisterSingletonInstance("Orbital", 1, 0, "Canli", &canli);
     qmlRegisterUncreatableType<ChatModel>("Orbital", 1, 0, "ChatModel", QStringLiteral("provided by App"));
     qmlRegisterUncreatableType<SessionModel>("Orbital", 1, 0, "SessionModel", QStringLiteral("provided by App"));
 
@@ -56,6 +59,10 @@ int main(int argc, char *argv[])
         const QString prompt = qEnvironmentVariable("ORBITAL_SCREENSHOT_PROMPT");
         if (!prompt.isEmpty())
             QTimer::singleShot(2500, &controller, [&controller, prompt] { controller.submit(prompt); });
+        // ORBITAL_SCREENSHOT_CANLI="soru": Canlı ekranında yazılı soru (ekranı açan tıklamadan sonra)
+        const QString canliSoru = qEnvironmentVariable("ORBITAL_SCREENSHOT_CANLI");
+        if (!canliSoru.isEmpty())
+            QTimer::singleShot(3500, &canli, [&canli, canliSoru] { canli.setSesli(false); canli.yaziyla(canliSoru); });
         const QString session = qEnvironmentVariable("ORBITAL_SCREENSHOT_SESSION");
         if (!session.isEmpty())
             QTimer::singleShot(2500, &controller, [&controller, session] { controller.openSession(session); });

@@ -46,6 +46,7 @@ ApplicationWindow {
             Behavior on Layout.preferredWidth { NumberAnimation { duration: Theme.normal; easing.type: Easing.OutCubic } }
             onOpenSettings: page => window.openSettings(page)
             onOpenStore: storeDialog.openStore()
+            onOpenCanli: canliEkran.ac()
             onCollapse: window.sidebarOpen = false
         }
 
@@ -320,6 +321,7 @@ ApplicationWindow {
 
     SettingsDialog { id: settings }
     StoreDialog { id: storeDialog }
+    CanliEkran { id: canliEkran }
     // Dev aid: installs store items named in ORBITAL_DEV_SETTINGS=store:<id>:<id>…
     Timer {
         id: devInstall

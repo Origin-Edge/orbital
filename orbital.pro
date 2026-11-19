@@ -1,5 +1,5 @@
 # Orbital — Qt Quick (QML) UI over the Qt Core/Network engines.
-QT       += core gui network quick quickcontrols2 svg
+QT       += core gui network quick quickcontrols2 svg multimedia texttospeech
 CONFIG   += c++17
 DEFINES  += QT_NO_KEYWORDS
 TARGET    = orbital
@@ -24,6 +24,7 @@ SOURCES += \
     src/app/chatmodel.cpp \
     src/app/controller.cpp \
     src/app/iconprovider.cpp \
+    src/app/canli.cpp \
     src/app/main.cpp
 
 HEADERS += \
@@ -42,6 +43,7 @@ HEADERS += \
     src/app/chatmodel.h \
     src/app/controller.h \
     src/app/iconprovider.h \
+    src/app/canli.h \
     src/arm_compat.h
 
 RESOURCES += resources/orbital.qrc

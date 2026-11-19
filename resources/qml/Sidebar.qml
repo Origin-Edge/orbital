@@ -11,6 +11,7 @@ Rectangle {
     color: Theme.sidebar
     signal openSettings(string page)
     signal openStore()
+    signal openCanli()
     signal collapse()
 
     readonly property bool codeMode: !App.isNoFolder
@@ -194,6 +195,7 @@ Rectangle {
             font.pixelSize: Theme.fontSmall
             Keys.onEscapePressed: { text = ""; root.searching = false }
         }
+        NavRow { text: "Canlı"; iconName: "mic"; onClicked: root.openCanli() }
         NavRow { text: "Mağaza"; iconName: "store"; onClicked: root.openStore() }
         NavRow { text: "Skill'ler"; iconName: "sparkle"; onClicked: root.openSettings("skills") }
         NavRow { text: "Eklentiler"; iconName: "blocks"; onClicked: root.openSettings("plugins") }
