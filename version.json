@@ -1,36 +1,36 @@
 {
-  "version": "0.5.8",
-  "tag_name": "v0.5.8",
-  "name": "Orbital v0.5.8",
-  "body": "Yeni: ORBITAL Canlı. Kenar çubuğundaki Canlı ile ORBITAL'la sesli konuş: sen susunca yanıtlar ve yanıtı Türkçe sesle okur; istersen yazarak da sorabilirsin. Kamerayı açınca 'bu ne?' gibi sorularda görüntüye bakar; 'Sürekli izle' açıkken belirli aralıklarla izler ve bir şey değişince söyler. Gerektiğinde internetten arar, kaynakları gösterir.",
+  "version": "0.5.9",
+  "tag_name": "v0.5.9",
+  "name": "Orbital v0.5.9",
+  "body": "ORBITAL artık yaptığı işi imzalıyor: ORBITAL Code'un attığı git commit'lerine ORBITAL ortak yazar olarak eklenir ve GitHub'da commit'in yanında görünür. İstemezsen ayarlardan kapatabilirsin (gitCoAuthor: false).",
   "assets": [
     {
       "name": "Orbital-x86_64.AppImage",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/Orbital-x86_64.AppImage"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/Orbital-x86_64.AppImage"
     },
     {
       "name": "Orbital-linux-amd64.deb",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/Orbital-linux-amd64.deb"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/Orbital-linux-amd64.deb"
     },
     {
       "name": "Orbital-windows-x64.zip",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/Orbital-windows-x64.zip"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/Orbital-windows-x64.zip"
     },
     {
       "name": "Orbital-macos-arm64.dmg",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/Orbital-macos-arm64.dmg"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/Orbital-macos-arm64.dmg"
     },
     {
       "name": "Orbital-macos-x86_64.dmg",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/Orbital-macos-x86_64.dmg"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/Orbital-macos-x86_64.dmg"
     },
     {
       "name": "Orbital-macos-universal.dmg",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/Orbital-macos-universal.dmg"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/Orbital-macos-universal.dmg"
     },
     {
       "name": "orbital-linux-x86_64.tar.gz",
-      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.8/orbital-linux-x86_64.tar.gz"
+      "browser_download_url": "https://orbital.oedge.xyz/guncelleme/v0.5.9/orbital-linux-x86_64.tar.gz"
     }
   ]
 }
