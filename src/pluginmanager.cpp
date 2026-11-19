@@ -1,5 +1,6 @@
 #include "pluginmanager.h"
 
+#include "config.h"
 #include "paths.h"
 #include "platform.h"
 #include "skillmanager.h"
@@ -7,6 +8,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QProcess>
@@ -273,9 +275,36 @@ QList<QPair<QString, QJsonObject>> PluginManager::scriptTools() const
     return out;
 }
 
+// ORBITAL'in kendi yaptığı işi imzalaması: commit'lere GitHub'daki orbital-oedge hesabını ortak yazar ekler.
+// opencode yönergeleri dosya yolu olarak aldığı için metin veri dizinine yazılır. Ayarlardan kapatılabilir:
+// config.json → "gitCoAuthor": false
+static QString imzaYonergesi()
+{
+    if (!Config::raw().value(QStringLiteral("gitCoAuthor")).toBool(true))
+        return {};
+    static const QByteArray metin =
+        "When you create a git commit for the user (git commit), end the commit message with a blank line and then exactly this trailer:\n"
+        "\n"
+        "Co-Authored-By: ORBITAL <358640922+orbital-oedge@users.noreply.github.com>\n"
+        "\n"
+        "Keep any other trailers the user or the project asks for. Skip it only if the user asks you not to add it. "
+        "Never amend, rebase or rewrite existing commits just to add it.\n";
+    const QString yol = Paths::dataDir() + QStringLiteral("/orbital-commit-imzasi.md");
+    QFile f(yol);
+    if (!f.open(QIODevice::ReadOnly) || f.readAll() != metin) {
+        f.close();
+        QDir().mkpath(Paths::dataDir());
+        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            f.write(metin);
+    }
+    return QFileInfo::exists(yol) ? yol : QString();
+}
+
 QStringList PluginManager::instructionFiles() const
 {
     QStringList out;
+    if (const QString imza = imzaYonergesi(); !imza.isEmpty())
+        out << imza;
     for (const Plugin &p : m_plugins) {
         if (!p.enabled)
             continue;

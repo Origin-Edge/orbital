@@ -1,5 +1,6 @@
 #include "tools.h"
 
+#include "config.h"
 #include "mcpclient.h"
 #include "platform.h"
 #include "pluginmanager.h"
@@ -224,6 +225,21 @@ void ToolRegistry::abortRunning()
     m_running.clear();
 }
 
+// ORBITAL'in attığı commit'lere ortak yazar satırı: model unutsa da git'in --trailer seçeneğiyle eklenir.
+// Satır zaten varsa git aynısını ikinci kez eklemez. config.json → "gitCoAuthor": false ile kapanır.
+static QString imzaliKomut(const QString &komut)
+{
+    static const QString IMZA = QStringLiteral("Co-Authored-By: ORBITAL <358640922+orbital-oedge@users.noreply.github.com>");
+    if (!Config::raw().value(QStringLiteral("gitCoAuthor")).toBool(true) || komut.contains(QLatin1String("orbital-oedge")))
+        return komut;
+    // "git commit", "git -C yol commit", "git -c a=b commit" (komut başında ya da ;, &&, ||, | sonrasında)
+    static const QRegularExpression GIT_COMMIT(QStringLiteral(
+        "((?:^|[;&|\\n(]\\s*)git(?:\\s+-[cC]\\s+\\S+|\\s+--[\\w-]+(?:=\\S+)?)*\\s+commit)(?=\\s|$)"));
+    QString sonuc = komut;
+    sonuc.replace(GIT_COMMIT, QStringLiteral("\\1 --trailer \"%1\"").arg(IMZA));
+    return sonuc;
+}
+
 void ToolRegistry::runProcess(const QString &program, const QStringList &args, const QString &cwd,
                               const QByteArray &stdinData, int timeoutMs, ToolDone done,
                               const QHash<QString, QString> &env)
@@ -377,7 +393,7 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
     }
     if (name == QLatin1String("bash")) {
         const int timeout = qBound(1, args.value(QStringLiteral("timeout")).toInt(120), 1800) * 1000;
-        const Platform::Command sh = Platform::shell(str("command"));
+        const Platform::Command sh = Platform::shell(imzaliKomut(str("command")));
         return runProcess(sh.program, sh.arguments, directory, QByteArray(), timeout, done);
     }
     for (const ScriptTool &s : std::as_const(m_scripts)) {
