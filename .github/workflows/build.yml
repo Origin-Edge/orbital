@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           pacman -Syu --noconfirm --needed base-devel git python \
-            qt6-base qt6-declarative qt6-svg syntax-highlighting ttf-dejavu curl squashfs-tools
+            qt6-base qt6-declarative qt6-svg qt6-multimedia qt6-speech syntax-highlighting ttf-dejavu curl squashfs-tools
 
       - uses: actions/checkout@v4
 
@@ -85,7 +85,7 @@ jobs:
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          modules: qtwaylandcompositor
+          modules: qtwaylandcompositor qtmultimedia qtspeech
           cache: true
 
       - name: Build Orbital
@@ -97,7 +97,7 @@ jobs:
         env:
           QML_SOURCES_PATHS: ${{ github.workspace }}/resources/qml
           EXTRA_PLATFORM_PLUGINS: libqwayland.so;libqoffscreen.so
-          EXTRA_QT_MODULES: waylandcompositor;svg
+          EXTRA_QT_MODULES: waylandcompositor;svg;multimedia;texttospeech
           NO_STRIP: "1"
         run: |
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/scalable/apps
@@ -188,6 +188,7 @@ jobs:
         with:
           version: ${{ env.QT_VERSION }}
           arch: win64_msvc2022_64
+          modules: qtmultimedia qtspeech
           cache: true
 
       - name: Build Orbital
@@ -254,6 +255,7 @@ jobs:
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
+          modules: qtmultimedia qtspeech
           cache: true
 
       - name: Build Orbital

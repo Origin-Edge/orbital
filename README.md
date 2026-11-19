@@ -56,7 +56,7 @@ Hazır paketler [Sürümler](https://github.com/kefy266/orbital/releases/latest)
 **Linux** (Arch/CachyOS paket adları):
 
 ```bash
-sudo pacman -S qt6-base qt6-declarative qt6-svg syntax-highlighting base-devel
+sudo pacman -S qt6-base qt6-declarative qt6-svg qt6-multimedia qt6-speech syntax-highlighting base-devel
 ```
 
 ```bash
