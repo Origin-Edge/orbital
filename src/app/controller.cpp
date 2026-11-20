@@ -65,8 +65,6 @@ AppController::AppController(QObject *parent)
     });
     // Developer status / package changed: providers changed, so restart the engine when idle.
     connect(m_account, &EdgeAccount::entitlementsChanged, this, [this] {
-        if (!EdgeAccount::token().isEmpty())
-            Q_EMIT toast(QStringLiteral("ORBITAL Code açıldı: Kod modunda günlük kotasız"));
         if (m_busy.isEmpty() && m_engine)
             switchEngine(preferredEngine());
         else
@@ -537,9 +535,8 @@ static QString prettyModelName(QString name, bool *free)
 static QString prettyProviderName(const QString &id, const QString &name)
 {
     static const QHash<QString, QString> headings{
-        {QStringLiteral("opencode"), QStringLiteral("ORBITAL Modelleri")},
+        {QStringLiteral("opencode"), QStringLiteral("ORBITAL Code")},
         {QStringLiteral("orbital-web"), QStringLiteral("ORBITAL Web")},
-        {QStringLiteral("orbital"), QStringLiteral("ORBITAL Code")},
         {QStringLiteral("gemini"), QStringLiteral("Google Modelleri")},
         {QStringLiteral("google"), QStringLiteral("Google Modelleri")},
         {QStringLiteral("openai"), QStringLiteral("OpenAI Modelleri")},
@@ -564,18 +561,13 @@ void AppController::refreshModels()
         // Sohbet lists only ORBITAL Web (yz.oedge.xyz); Kod never does (it has no tools).
         const bool chat = isNoFolder();
         QList<ModelChoice> ordered;
-        // Kod: ORBITAL Code (signed-in users) first, then the free ORBITAL models, then everything else.
-        if (!chat)
-            for (const ModelChoice &m : models)
-                if (m.provider == QLatin1String("orbital"))
-                    ordered << m;
+        // Kod (ORBITAL Code): the opencode models first, then the user's own API providers.
         for (const ModelChoice &m : models)
             if (chat ? m.provider == QLatin1String("orbital-web") : m.provider == QLatin1String("opencode"))
                 ordered << m;
         if (!chat)
             for (const ModelChoice &m : models)
-                if (m.provider != QLatin1String("opencode") && m.provider != QLatin1String("orbital-web")
-                    && m.provider != QLatin1String("orbital"))
+                if (m.provider != QLatin1String("opencode") && m.provider != QLatin1String("orbital-web"))
                     ordered << m;
         for (const ModelChoice &m : std::as_const(ordered)) {
             bool free = false;
@@ -584,7 +576,7 @@ void AppController::refreshModels()
                                     {QStringLiteral("provider"), prettyProviderName(m.provider, m.providerName)},
                                     {QStringLiteral("model"), m.model},
                                     {QStringLiteral("name"), pretty},
-                                    {QStringLiteral("free"), free || m.provider == QLatin1String("orbital") || m.provider == QLatin1String("opencode")},
+                                    {QStringLiteral("free"), free || m.provider == QLatin1String("opencode")},
                                     {QStringLiteral("locked"), m_lockedModels.contains(m.ref())},
                                     {QStringLiteral("lockText"), lockText(m.ref())}};
         }
@@ -1350,8 +1342,7 @@ void AppController::expireLocks()
 // First usable model after a lock: free OpenCode models, then cheap fast models, then anything unlocked.
 QString AppController::fallbackModel() const
 {
-    // Kota dolunca sıra: opencode'un diğer ücretsiz modelleri -> ORBITAL'ın kendi modelleri (giriş
-    // yapan herkese kotasız; sunucu tarafında da kendi içinde yedek zinciri var) -> Gemini -> kalan her şey.
+    // Kota dolunca sıra: opencode'un diğer ücretsiz modelleri -> Gemini -> kalan her şey.
     auto acik = [this](const QString &r) { return !r.isEmpty() && !m_lockedModels.contains(r); };
     QStringList refs;
     for (const QVariant &v : m_models)
@@ -1367,14 +1358,6 @@ QString AppController::fallbackModel() const
         if (r.startsWith(QLatin1String("opencode/")) && m.value(QStringLiteral("free")).toBool() && acik(r))
             return r;
     }
-    static const QStringList kOrbital{QStringLiteral("orbital/gpt-oss-120b"), QStringLiteral("orbital/qwen3.8-27b"),
-                                      QStringLiteral("orbital/gpt-oss-20b")};
-    for (const QString &r : kOrbital)
-        if (refs.contains(r) && acik(r))
-            return r;
-    for (const QString &r : std::as_const(refs))
-        if (r.startsWith(QLatin1String("orbital/")) && acik(r))
-            return r;
     static const QStringList kGemini{QStringLiteral("gemini/gemini-3.5-flash"), QStringLiteral("gemini/gemini-3.5-flash-lite"),
                                      QStringLiteral("gemini/gemini-3-flash-preview"), QStringLiteral("gemini/gemini-3.1-flash-lite")};
     for (const QString &r : kGemini)
@@ -1393,8 +1376,7 @@ void AppController::lockModel(const QString &ref, const QString &reason)
     const QString low = reason.toLower();
     const QString providerPrefix = ref.section(QLatin1Char('/'), 0, 0) + QLatin1Char('/');
     // Account-wide limits lock every model of that provider.
-    const bool lockAllProvider = (providerPrefix == QLatin1String("orbital/") && low.contains(QStringLiteral("günlük")))
-                              || (providerPrefix == QLatin1String("opencode/")
+    const bool lockAllProvider = (providerPrefix == QLatin1String("opencode/")
                                   && (low.contains(QStringLiteral("free usage exceeded"))
                                       || low.contains(QStringLiteral("free limit reached"))
                                       || low.contains(QStringLiteral("free usage limit reached"))))
@@ -2903,7 +2885,7 @@ void AppController::accountSignOut()
 QString AppController::appVersion() const
 {
     const QString ver = QCoreApplication::applicationVersion();
-    return ver.isEmpty() ? QStringLiteral("0.5.10") : ver;
+    return ver.isEmpty() ? QStringLiteral("0.5.11") : ver;
 }
 
 void AppController::checkForUpdates(bool silent)

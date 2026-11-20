@@ -110,7 +110,6 @@ QList<ProviderConfig> providers()
     // this file does not depend on the GUI-side EdgeAccount class.
     const QJsonObject account = Paths::loadSettings().value(QStringLiteral("edgeAccount")).toObject();
     const QString accountToken = account.value(QStringLiteral("token")).toString();
-    const bool signedIn = !accountToken.isEmpty();
     // ORBITAL Web (yz.oedge.xyz): the Sohbet mode's models. No API key; the server keeps its own.
     if (!all.contains(QStringLiteral("orbital-web"))) {
         ProviderConfig p;
@@ -119,16 +118,6 @@ QList<ProviderConfig> providers()
         p.type = QStringLiteral("openai");
         p.baseUrl = qEnvironmentVariable("ORBITAL_WEB_URL", QStringLiteral("https://yz.oedge.xyz")) + QStringLiteral("/v1");
         // Signed in: the server opens Pro/Ultra by the account's Origin Edge package (Edge+, Edge Pro, developer).
-        p.apiKey = accountToken;
-        out.prepend(p);
-    }
-    // ORBITAL Code: ORBITAL Cloud models (orbital.oedge.xyz) in Kod, for every EdgeAccount user, no daily quota.
-    if (signedIn && !all.contains(QStringLiteral("orbital"))) {
-        ProviderConfig p;
-        p.id = QStringLiteral("orbital");
-        p.name = QStringLiteral("ORBITAL Code");
-        p.type = QStringLiteral("openai");
-        p.baseUrl = qEnvironmentVariable("ORBITAL_CLOUD_URL", QStringLiteral("https://orbital.oedge.xyz")) + QStringLiteral("/v1");
         p.apiKey = accountToken;
         out.prepend(p);
     }

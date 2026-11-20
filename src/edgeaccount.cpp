@@ -270,7 +270,7 @@ void EdgeAccount::signOut()
         connect(reply, &QNetworkReply::finished, reply, &QObject::deleteLater);
     }
     QJsonObject s = Paths::loadSettings();
-    const bool hadExtras = !t.isEmpty(); // ORBITAL Code goes away with the session
+    const bool hadExtras = !t.isEmpty(); // session ended: ORBITAL Web falls back to the free level
     s.remove(QStringLiteral("edgeAccount"));
     Paths::saveSettings(s);
     Q_EMIT changed();
