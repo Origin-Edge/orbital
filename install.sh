@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Orbital Universal One-Line Installer
 # Supports: macOS (Apple Silicon & Intel) & Linux (x86_64)
-# Usage: curl -fsSL https://raw.githubusercontent.com/kefy266/orbital/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/Origin-Edge/orbital/main/install.sh | bash
 
 BOLD='\033[1m'
 CYAN='\033[0;36m'
@@ -25,7 +25,7 @@ if [ "$OS" = "Darwin" ]; then
 
   if command -v brew >/dev/null 2>&1; then
     printf "${CYAN}→ Homebrew tespit edildi, Cask üzerinden kuruluyor...${NC}\n"
-    if brew install --cask kefy266/orbital/orbital; then
+    if brew install --cask Origin-Edge/orbital/orbital; then
       printf "${GREEN}✓ Orbital Homebrew ile kuruldu: /Applications/Orbital.app${NC}\n"
       printf "${BOLD}${CYAN}→ Orbital başlatılıyor...${NC}\n"
       open /Applications/Orbital.app 2>/dev/null || true
@@ -39,7 +39,7 @@ if [ "$OS" = "Darwin" ]; then
     printf "${YELLOW}→ Intel tabanlı Mac tespit edildi.${NC}\n"
     if command -v brew >/dev/null 2>&1; then
       printf "${CYAN}→ Homebrew ile Intel mimarisine uygun olarak kuruluyor...${NC}\n"
-      brew install kefy266/orbital/orbital
+      brew install Origin-Edge/orbital/orbital
       printf "${GREEN}✓ Orbital başarıyla kuruldu!${NC}\n"
       open /Applications/Orbital.app 2>/dev/null || orbital || true
       exit 0
@@ -96,7 +96,7 @@ elif [ "$OS" = "Linux" ]; then
 
   ICON_DIR="${HOME}/.local/share/icons/hicolor/scalable/apps"
   mkdir -p "$ICON_DIR"
-  curl -fsSL "https://raw.githubusercontent.com/kefy266/orbital/main/resources/orbital.svg" -o "${ICON_DIR}/orbital.svg" || true
+  curl -fsSL "https://raw.githubusercontent.com/Origin-Edge/orbital/main/resources/orbital.svg" -o "${ICON_DIR}/orbital.svg" || true
 
   DESKTOP_DIR="${HOME}/.local/share/applications"
   mkdir -p "$DESKTOP_DIR"

@@ -1,6 +1,6 @@
 # ◉ Orbital
 
-[![Build](https://github.com/kefy266/orbital/actions/workflows/build.yml/badge.svg)](https://github.com/kefy266/orbital/actions/workflows/build.yml) · **Site:** https://orbital.oedge.xyz
+[![Build](https://github.com/Origin-Edge/orbital/actions/workflows/build.yml/badge.svg)](https://github.com/Origin-Edge/orbital/actions/workflows/build.yml) · **Site:** https://orbital.oedge.xyz
 
 **Skill ve eklenti destekli, sade bir masaüstü AI kod asistanı.** Qt Quick (QML) ile yazıldı, sistemin açık/koyu temasını izler. Hesap ya da API anahtarı gerektirmeyen ücretsiz ORBITAL modelleriyle çalışır; istersen kendi OpenAI, Anthropic, Gemini… anahtarlarını bağlayabilirsin.
 
@@ -24,13 +24,13 @@
 Homebrew ile tek komutla kurabilirsiniz (Gatekeeper sorunu olmadan doğrudan `/Applications` klasörüne eklenir):
 
 ```bash
-brew install --cask kefy266/orbital/orbital
+brew install --cask Origin-Edge/orbital/orbital
 ```
 
 Veya terminalden tek satırla kurup açın:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kefy266/orbital/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Origin-Edge/orbital/main/install.sh | bash
 ```
 
 > [!TIP]
@@ -41,13 +41,13 @@ curl -fsSL https://raw.githubusercontent.com/kefy266/orbital/main/install.sh | b
 
 ### Hazır paketler
 
-Hazır paketler [Sürümler](https://github.com/kefy266/orbital/releases/latest) sayfasında da mevcuttur. Windows ve macOS paketleri Qt'yi içinde taşır:
+Hazır paketler [Sürümler](https://github.com/Origin-Edge/orbital/releases/latest) sayfasında da mevcuttur. Windows ve macOS paketleri Qt'yi içinde taşır:
 
 | Sistem | Paket | Not |
 |---|---|---|
-| Windows 10/11 (x64) | [`Orbital-windows-x64.zip`](https://github.com/kefy266/orbital/releases/latest/download/Orbital-windows-x64.zip) | Zip'i aç, `Orbital.exe`'yi çalıştır. SmartScreen uyarısında **Ek bilgi → Yine de çalıştır**. Dahili otomatik güncelleme. |
-| macOS 12+ (Apple Silicon) | [`Orbital-macos-arm64.dmg`](https://github.com/kefy266/orbital/releases/latest/download/Orbital-macos-arm64.dmg) | Homebrew (`--cask`), `install.sh` veya DMG ile kurulum. Dahili otomatik güncelleme. |
-| Linux (x86_64) | [`Orbital-x86_64.AppImage`](https://github.com/kefy266/orbital/releases/latest/download/Orbital-x86_64.AppImage) · [`.tar.gz`](https://github.com/kefy266/orbital/releases/latest/download/orbital-linux-x86_64.tar.gz) | AppImage kurulum gerektirmez (`chmod +x` verip çalıştır). Dahili otomatik güncelleme. |
+| Windows 10/11 (x64) | [`Orbital-windows-x64.zip`](https://github.com/Origin-Edge/orbital/releases/latest/download/Orbital-windows-x64.zip) | Zip'i aç, `Orbital.exe`'yi çalıştır. SmartScreen uyarısında **Ek bilgi → Yine de çalıştır**. Dahili otomatik güncelleme. |
+| macOS 12+ (Apple Silicon) | [`Orbital-macos-arm64.dmg`](https://github.com/Origin-Edge/orbital/releases/latest/download/Orbital-macos-arm64.dmg) | Homebrew (`--cask`), `install.sh` veya DMG ile kurulum. Dahili otomatik güncelleme. |
+| Linux (x86_64) | [`Orbital-x86_64.AppImage`](https://github.com/Origin-Edge/orbital/releases/latest/download/Orbital-x86_64.AppImage) · [`.tar.gz`](https://github.com/Origin-Edge/orbital/releases/latest/download/orbital-linux-x86_64.tar.gz) | AppImage kurulum gerektirmez (`chmod +x` verip çalıştır). Dahili otomatik güncelleme. |
 
 İlk açılışta Orbital bulut modellerini hazırlamak için motorunu bir kez indirir (yaklaşık 60–180 MB).
 
@@ -77,7 +77,7 @@ qmake CONFIG+=release orbital.pro -o build.mk && nmake /f build.mk && build\Orbi
 
 Kod renklendirmesi KDE'nin KSyntaxHighlighting kütüphanesini kullanır; bulunmadığı sistemlerde kod blokları renksiz gösterilir. Windows'ta `.sh` uzantılı eklenti betikleri için Git for Windows'un `bash`'i gerekir; eklentiler `.ps1` ya da `.py` betikleri de kullanabilir.
 
-Her commit'te [GitHub Actions](https://github.com/kefy266/orbital/actions) üç platformda derler ve test eder; `v` ile başlayan her etiket bu üç paketle otomatik bir sürüm oluşturur.
+Her commit'te [GitHub Actions](https://github.com/Origin-Edge/orbital/actions) üç platformda derler ve test eder; `v` ile başlayan her etiket bu üç paketle otomatik bir sürüm oluşturur.
 
 ## Mağazaya katkı
 
