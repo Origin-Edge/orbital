@@ -110,7 +110,7 @@ QList<ProviderConfig> providers()
     // this file does not depend on the GUI-side EdgeAccount class.
     const QJsonObject account = Paths::loadSettings().value(QStringLiteral("edgeAccount")).toObject();
     const QString accountToken = account.value(QStringLiteral("token")).toString();
-    const bool developer = !accountToken.isEmpty() && account.value(QStringLiteral("developer")).toBool();
+    const bool signedIn = !accountToken.isEmpty();
     // ORBITAL Web (yz.oedge.xyz): the Sohbet mode's models. No API key; the server keeps its own.
     if (!all.contains(QStringLiteral("orbital-web"))) {
         ProviderConfig p;
@@ -122,8 +122,8 @@ QList<ProviderConfig> providers()
         p.apiKey = accountToken;
         out.prepend(p);
     }
-    // ORBITAL Code: ORBITAL Cloud models (orbital.oedge.xyz) in Kod, for developer accounts, no daily quota.
-    if (developer && !all.contains(QStringLiteral("orbital"))) {
+    // ORBITAL Code: ORBITAL Cloud models (orbital.oedge.xyz) in Kod, for every EdgeAccount user, no daily quota.
+    if (signedIn && !all.contains(QStringLiteral("orbital"))) {
         ProviderConfig p;
         p.id = QStringLiteral("orbital");
         p.name = QStringLiteral("ORBITAL Code");

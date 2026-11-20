@@ -270,8 +270,7 @@ void EdgeAccount::signOut()
         connect(reply, &QNetworkReply::finished, reply, &QObject::deleteLater);
     }
     QJsonObject s = Paths::loadSettings();
-    const bool hadExtras = s.value(QStringLiteral("edgeAccount")).toObject().value(QStringLiteral("developer")).toBool()
-                           || s.value(QStringLiteral("edgeAccount")).toObject().value(QStringLiteral("orbital")).toInt(1) > 1;
+    const bool hadExtras = !t.isEmpty(); // ORBITAL Code goes away with the session
     s.remove(QStringLiteral("edgeAccount"));
     Paths::saveSettings(s);
     Q_EMIT changed();

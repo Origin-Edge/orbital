@@ -22,7 +22,7 @@ public:
     static QString issuer();
     static QString cloudUrl();   // https://orbital.oedge.xyz
     static QString token();      // Orbital session token, empty when signed out
-    // Developer accounts get ORBITAL Code (ORBITAL Cloud models in Kod, no daily quota).
+    // Signed-in accounts get ORBITAL Code (ORBITAL Cloud models in Kod, no daily quota).
     // Cached in settings so the provider is there at startup; refreshed from /api/ben.
     static bool developer();
     static int orbitalLevel();   // ORBITAL Web models: 1 Fast, 2 up to Pro, 3 all
