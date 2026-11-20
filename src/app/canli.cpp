@@ -1,3 +1,5 @@
+#include <QLocale>
+#include <QCoreApplication>
 #include "canli.h"
 
 #include "../edgeaccount.h"
@@ -25,7 +27,7 @@
 namespace {
 // Görüntü isteyen ifadeler: "bu ne", "kameraya bak", "ekranda ne var", "elimdeki ne"…
 const QRegularExpression GORSEL_ISTEK(
-    QStringLiteral("(kamera|bak|gör|görüyor|elimde|elimdeki|arkamda|üstümde|bu ne|bunu tanı|nasıl görünüyorum|"
+    QCoreApplication::translate("Orbital", "(kamera|bak|gör|görüyor|elimde|elimdeki|arkamda|üstümde|bu ne|bunu tanı|nasıl görünüyorum|"
                    "ekran|okur musun|ne yazıyor|neresi|hangi renk|kaç tane|şunu|şuna)"),
     QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
 
@@ -113,7 +115,7 @@ void Canli::setGoruntuAcik(bool v)
 
 void Canli::setIzle(bool v)
 {
-    if (v && !m_goruntuAcik) { uyar(QStringLiteral("Sürekli izleme için önce kamerayı aç.")); v = false; }
+    if (v && !m_goruntuAcik) { uyar(QCoreApplication::translate("Orbital", "Sürekli izleme için önce kamerayı aç.")); v = false; }
     if (m_izle == v) { Q_EMIT durumDegisti(); return; }
     m_izle = v;
     if (v) { m_izleZamanlayici.start(m_izleAralik * 1000); m_sonGozlem.clear(); }
@@ -140,7 +142,7 @@ void Canli::baslat()
     durumAyarla(QStringLiteral("dinliyor"));
     Q_EMIT durumDegisti();
     if (m_mesajlar.isEmpty()) {
-        const QString selam = QStringLiteral("Merhaba, ben ORBITAL. Seni dinliyorum.");
+        const QString selam = QCoreApplication::translate("Orbital", "Merhaba, ben ORBITAL. Seni dinliyorum.");
         mesajEkle(QStringLiteral("orbital"), selam);
         seslendir(selam);
     }
@@ -178,7 +180,7 @@ void Canli::mikrofonAc()
 {
     if (m_kaynak) return;
     const QAudioDevice cihaz = QMediaDevices::defaultAudioInput();
-    if (cihaz.isNull()) { uyar(QStringLiteral("Mikrofon bulunamadı. Yazarak da konuşabilirsin.")); return; }
+    if (cihaz.isNull()) { uyar(QCoreApplication::translate("Orbital", "Mikrofon bulunamadı. Yazarak da konuşabilirsin.")); return; }
     QAudioFormat bicim;
     bicim.setSampleRate(16000);
     bicim.setChannelCount(1);
@@ -193,7 +195,7 @@ void Canli::mikrofonAc()
     m_kaynak = new QAudioSource(cihaz, bicim, this);
     m_kaynak->setBufferSize(m_ornekHizi * m_kanal * (m_float ? 4 : 2) / 5);
     m_akis = m_kaynak->start();
-    if (!m_akis) { uyar(QStringLiteral("Mikrofon açılamadı. Yazarak da konuşabilirsin.")); m_kaynak->deleteLater(); return; }
+    if (!m_akis) { uyar(QCoreApplication::translate("Orbital", "Mikrofon açılamadı. Yazarak da konuşabilirsin.")); m_kaynak->deleteLater(); return; }
     connect(m_akis, &QIODevice::readyRead, this, &Canli::sesOku);
 }
 
@@ -281,8 +283,7 @@ QByteArray Canli::wavYap(const QByteArray &pcm) const
 // Whisper sessizlik ya da gürültüde sık uydurduğu kalıplar: bunlar soru sayılmaz.
 static bool uydurmaMi(const QString &metin)
 {
-    static const QRegularExpression KALIP(QStringLiteral(
-        "^(altyaz[ıi].*|izledi[gğ]iniz i[cç]in te[sş]ekk[uü]r.*|abone ol.*|te[sş]ekk[uü]rler\\W*|"
+    static const QRegularExpression KALIP(QCoreApplication::translate("Orbital", "^(altyaz[ıi].*|izledi[gğ]iniz i[cç]in te[sş]ekk[uü]r.*|abone ol.*|te[sş]ekk[uü]rler\\W*|"
         "thank(s| you).*|thanks for watching.*|we should continue\\W*|you\\W*|bye\\W*|"
         "\\W*(m[uü]zik|music|alk[iı][sş])\\W*|\\.+|…)$"),
         QRegularExpression::CaseInsensitiveOption | QRegularExpression::UseUnicodePropertiesOption);
@@ -301,7 +302,7 @@ void Canli::sesGonder(const QByteArray &pcm)
         y->deleteLater();
         const QJsonObject v = QJsonDocument::fromJson(y->readAll()).object();
         if (y->error() != QNetworkReply::NoError) {
-            uyar(v.value(QStringLiteral("error")).toString(QStringLiteral("Söylediğin anlaşılamadı.")));
+            uyar(v.value(QStringLiteral("error")).toString(QCoreApplication::translate("Orbital", "Söylediğin anlaşılamadı.")));
             if (m_aktif) durumAyarla(QStringLiteral("dinliyor"));
             return;
         }
@@ -322,9 +323,9 @@ void Canli::yaziyla(const QString &metin)
 
 void Canli::simdiBak()
 {
-    if (!m_goruntuAcik) { uyar(QStringLiteral("Önce kamerayı aç.")); return; }
+    if (!m_goruntuAcik) { uyar(QCoreApplication::translate("Orbital", "Önce kamerayı aç.")); return; }
     if (!m_aktif) { m_aktif = true; mikrofonAc(); Q_EMIT durumDegisti(); }
-    sor(QStringLiteral("Şu an ne görüyorsun? Kısaca anlat."), true);
+    sor(QCoreApplication::translate("Orbital", "Şu an ne görüyorsun? Kısaca anlat."), true);
 }
 
 void Canli::sor(const QString &metin, bool kareZorla)
@@ -375,6 +376,7 @@ static QNetworkRequest canliIstek(const QString &url)
     istek.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
     const QString jeton = EdgeAccount::token();
     if (!jeton.isEmpty()) istek.setRawHeader("Authorization", "Bearer " + jeton.toUtf8());
+    istek.setRawHeader("X-Orbital-Lang", QLocale().language() == QLocale::English ? "en" : "tr");
     istek.setTransferTimeout(120000);
     return istek;
 }
@@ -392,14 +394,14 @@ void Canli::soruyuGonder(const QString &kareDataUrl)
         y->deleteLater();
         const QJsonObject v = QJsonDocument::fromJson(y->readAll()).object();
         if (y->error() != QNetworkReply::NoError || v.value(QStringLiteral("yanit")).toString().isEmpty()) {
-            QString h = v.value(QStringLiteral("error")).toString(QStringLiteral("ORBITAL yanıt veremedi. İnternet bağlantını kontrol et."));
+            QString h = v.value(QStringLiteral("error")).toString(QCoreApplication::translate("Orbital", "ORBITAL yanıt veremedi. İnternet bağlantını kontrol et."));
             if (v.value(QStringLiteral("kilitli")).toBool()) h += QStringLiteral(" (hesap.oedge.xyz/abonelik)");
             mesajEkle(QStringLiteral("orbital"), h);
             if (m_aktif) durumAyarla(QStringLiteral("dinliyor"));
             return;
         }
         const QString yanit = v.value(QStringLiteral("yanit")).toString();
-        m_gecmis.append(QVariantMap{{QStringLiteral("rol"), QStringLiteral("kullanici")}, {QStringLiteral("metin"), kareVar ? soru + QStringLiteral(" [kamera görüntüsü gösterildi]") : soru}});
+        m_gecmis.append(QVariantMap{{QStringLiteral("rol"), QStringLiteral("kullanici")}, {QStringLiteral("metin"), kareVar ? soru + QCoreApplication::translate("Orbital", " [kamera görüntüsü gösterildi]") : soru}});
         m_gecmis.append(QVariantMap{{QStringLiteral("rol"), QStringLiteral("orbital")}, {QStringLiteral("metin"), yanit}});
         while (m_gecmis.size() > 16) m_gecmis.removeFirst();
         mesajEkle(QStringLiteral("orbital"), yanit, v.value(QStringLiteral("kaynaklar")).toArray().toVariantList());
@@ -415,7 +417,7 @@ void Canli::izleGonder(const QString &kareDataUrl)
         y->deleteLater();
         const QJsonObject v = QJsonDocument::fromJson(y->readAll()).object();
         if (y->error() != QNetworkReply::NoError) {
-            uyar(v.value(QStringLiteral("error")).toString(QStringLiteral("İzleme durdu.")));
+            uyar(v.value(QStringLiteral("error")).toString(QCoreApplication::translate("Orbital", "İzleme durdu.")));
             setIzle(false);
             return;
         }
@@ -440,10 +442,12 @@ void Canli::seslendir(const QString &metin)
     if (!m_sesli || metin.isEmpty()) { if (m_aktif) durumAyarla(QStringLiteral("dinliyor")); return; }
     if (!m_tts) {
         m_tts = new QTextToSpeech(this);
-        m_tts->setLocale(QLocale(QLocale::Turkish, QLocale::Turkey));
+        // Sesli okuma arayüz dilinde (Türkçe ya da İngilizce)
+        const QLocale::Language dil = QLocale().language() == QLocale::English ? QLocale::English : QLocale::Turkish;
+        m_tts->setLocale(dil == QLocale::English ? QLocale(QLocale::English, QLocale::UnitedStates) : QLocale(QLocale::Turkish, QLocale::Turkey));
         const auto sesler = m_tts->availableVoices();
         for (const QVoice &s : sesler) {
-            if (s.locale().language() == QLocale::Turkish) { m_tts->setVoice(s); break; }
+            if (s.locale().language() == dil) { m_tts->setVoice(s); break; }
         }
         m_tts->setRate(0.05);
         connect(m_tts, &QTextToSpeech::stateChanged, this, [this](QTextToSpeech::State s) {

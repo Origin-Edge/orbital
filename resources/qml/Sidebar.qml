@@ -38,7 +38,7 @@ Rectangle {
 
     FolderDialog {
         id: folderDialog
-        title: "Proje klasörü seç"
+        title: qsTr("Proje klasörü seç")
         // Without an explicit window the non-native fallback dialog never shows.
         parentWindow: root.Window.window
         onAccepted: App.setProject(selectedFolder)
@@ -110,17 +110,17 @@ Rectangle {
                 OMenu {
                     id: menu
                     OMenuItem {
-                        text: "Yeniden adlandır"
+                        text: qsTr("Yeniden adlandır")
                         iconName: "pencil"
                         onTriggered: renameDialog.ask(row.sessionId, row.title)
                     }
                     OMenuItem {
-                        text: "Markdown olarak dışa aktar"
+                        text: qsTr("Markdown olarak dışa aktar")
                         iconName: "file"
                         onTriggered: App.exportChatAsMarkdown()
                     }
                     OMenuItem {
-                        text: "Sohbeti sil"
+                        text: qsTr("Sohbeti sil")
                         iconName: "trash"
                         danger: true
                         onTriggered: confirmDelete.ask(row.sessionId, row.title)
@@ -145,7 +145,7 @@ Rectangle {
             spacing: 8
             Icon { name: "logo"; size: 22 }
             Text {
-                text: "Orbital"
+                text: qsTr("Orbital")
                 font.family: Theme.font
                 font.pixelSize: Theme.fontTitle - 1
                 font.weight: Font.DemiBold
@@ -166,14 +166,14 @@ Rectangle {
                 property bool hovered: false
                 HoverHandler { onHoveredChanged: parent.hovered = hovered }
                 ToolTip.delay: 600
-                ToolTip.text: "Sohbet: klasörsüz sohbet · Kod: proje klasöründe çalışan ajan"
+                ToolTip.text: qsTr("Sohbet: klasörsüz sohbet · Kod: proje klasöründe çalışan ajan")
             }
             IconButton { iconName: "sidebar"; tip: "Kenar çubuğunu kapat (Ctrl+B)"; onClicked: root.collapse() }
         }
 
-        NavRow { text: "Yeni sohbet"; iconName: "plus"; onClicked: App.newChat() }
+        NavRow { text: qsTr("Yeni sohbet"); iconName: "plus"; onClicked: App.newChat() }
         NavRow {
-            text: "Ara"
+            text: qsTr("Ara")
             iconName: "search"
             active: root.searching
             onClicked: {
@@ -191,14 +191,14 @@ Rectangle {
             Layout.topMargin: 2
             Layout.bottomMargin: 2
             implicitHeight: 34
-            placeholderText: "Sohbetlerde ara"
+            placeholderText: qsTr("Sohbetlerde ara")
             font.pixelSize: Theme.fontSmall
             Keys.onEscapePressed: { text = ""; root.searching = false }
         }
-        NavRow { text: "Canlı"; iconName: "mic"; onClicked: root.openCanli() }
-        NavRow { text: "Mağaza"; iconName: "store"; onClicked: root.openStore() }
-        NavRow { text: "Skill'ler"; iconName: "sparkle"; onClicked: root.openSettings("skills") }
-        NavRow { text: "Eklentiler"; iconName: "blocks"; onClicked: root.openSettings("plugins") }
+        NavRow { text: qsTr("Canlı"); iconName: "mic"; onClicked: root.openCanli() }
+        NavRow { text: qsTr("Mağaza"); iconName: "store"; onClicked: root.openStore() }
+        NavRow { text: qsTr("Skill'ler"); iconName: "sparkle"; onClicked: root.openSettings("skills") }
+        NavRow { text: qsTr("Eklentiler"); iconName: "blocks"; onClicked: root.openSettings("plugins") }
 
         // Chats (Sohbet) or projects with their chats (Kod)
         Flickable {
@@ -217,7 +217,7 @@ Rectangle {
                 spacing: 1
 
                 Text {
-                    text: root.codeMode ? "Projeler" : "Sohbetler"
+                    text: root.codeMode ? qsTr("Projeler") : qsTr("Sohbetler")
                     leftPadding: 10
                     bottomPadding: 6
                     font.family: Theme.font
@@ -323,7 +323,7 @@ Rectangle {
                 NavRow {
                     visible: root.codeMode
                     width: listColumn.width
-                    text: "Klasör aç…"
+                    text: qsTr("Klasör aç…")
                     iconName: "folder"
                     onClicked: folderDialog.open()
                 }
@@ -333,7 +333,7 @@ Rectangle {
                     width: listColumn.width
                     topPadding: 24
                     horizontalAlignment: Text.AlignHCenter
-                    text: App.engineReady ? "Henüz sohbet yok" : "Hazırlanıyor…"
+                    text: App.engineReady ? qsTr("Henüz sohbet yok") : qsTr("Hazırlanıyor…")
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSmall
                     color: Theme.textFaint
@@ -386,7 +386,7 @@ Rectangle {
                         Text {
                             Layout.fillWidth: true
                             text: App.accountSignedIn ? (App.accountName || App.accountEmail)
-                                                      : App.accountBusy ? "Tarayıcıda girişi tamamla…" : "EdgeAccount ile giriş yap"
+                                                      : App.accountBusy ? qsTr("Tarayıcıda girişi tamamla…") : qsTr("EdgeAccount ile giriş yap")
                             elide: Text.ElideRight
                             font.family: Theme.font
                             font.pixelSize: Theme.fontUi
@@ -394,7 +394,7 @@ Rectangle {
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: App.accountSignedIn ? App.accountEmail : "Origin Edge hesabı"
+                            text: App.accountSignedIn ? App.accountEmail : qsTr("Origin Edge hesabı")
                             elide: Text.ElideRight
                             font.family: Theme.font
                             font.pixelSize: Theme.fontCaption
@@ -429,11 +429,11 @@ Rectangle {
         property string targetId
         function ask(id, title) {
             targetId = id
-            message = "“" + title + "” kalıcı olarak silinecek."
+            message = "“" + title + qsTr("” kalıcı olarak silinecek.")
             open()
         }
-        heading: "Sohbet silinsin mi?"
-        confirmText: "Sil"
+        heading: qsTr("Sohbet silinsin mi?")
+        confirmText: qsTr("Sil")
         onConfirmed: App.deleteSession(targetId)
     }
 }

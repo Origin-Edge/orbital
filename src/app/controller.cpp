@@ -1,3 +1,5 @@
+#include <QLocale>
+#include <QCoreApplication>
 #include "controller.h"
 
 #include "../config.h"
@@ -120,7 +122,7 @@ QString AppController::engineId() const
 QString AppController::projectName() const
 {
     if (m_directory == Paths::noFolderDir())
-        return QStringLiteral("Klasörsüz (no-folder)");
+        return QCoreApplication::translate("Orbital", "Klasörsüz (no-folder)");
     const QString name = QDir(m_directory).dirName();
     return name.isEmpty() ? m_directory : name;
 }
@@ -149,7 +151,7 @@ QString AppController::modelLabel() const
             return m.value(QStringLiteral("name")).toString();
     }
     bool free = false;
-    return ref.isEmpty() ? QStringLiteral("Model seç") : prettyModelName(ref.section(QLatin1Char('/'), 1), &free);
+    return ref.isEmpty() ? QCoreApplication::translate("Orbital", "Model seç") : prettyModelName(ref.section(QLatin1Char('/'), 1), &free);
 }
 
 QVariantList AppController::agents() const
@@ -190,6 +192,32 @@ void AppController::setThemeMode(const QString &mode)
     s.insert(QStringLiteral("theme"), mode);
     Paths::saveSettings(s);
     Q_EMIT themeModeChanged();
+}
+
+QString AppController::resolvedLanguage()
+{
+    const QString env = qEnvironmentVariable("ORBITAL_LANG");
+    if (env == QLatin1String("tr") || env == QLatin1String("en"))
+        return env;
+    const QString saved = Paths::loadSettings().value(QStringLiteral("language")).toString();
+    if (saved == QLatin1String("tr") || saved == QLatin1String("en"))
+        return saved;
+    return QLocale::system().language() == QLocale::Turkish ? QStringLiteral("tr") : QStringLiteral("en");
+}
+
+QString AppController::language() const
+{
+    return resolvedLanguage();
+}
+
+void AppController::setLanguage(const QString &lang)
+{
+    if (lang != QLatin1String("tr") && lang != QLatin1String("en"))
+        return;
+    QJsonObject s = Paths::loadSettings();
+    s.insert(QStringLiteral("language"), lang);
+    Paths::saveSettings(s);
+    Q_EMIT languageChanged();
 }
 
 void AppController::setStatus(const QString &text, bool error)
@@ -285,7 +313,7 @@ void AppController::switchEngine(const QString &id)
     Paths::saveSettings(s);
 
     connectEngine();
-    setStatus(QStringLiteral("Hazırlanıyor…"));
+    setStatus(QCoreApplication::translate("Orbital", "Hazırlanıyor…"));
     m_engine->start(m_directory);
 }
 
@@ -458,8 +486,8 @@ void AppController::connectEngine()
         if (!isCurrent(sid))
             return;
         const auto k = [](int n) { return n >= 1000 ? QStringLiteral("%1k").arg(n / 1000.0, 0, 'f', 1) : QString::number(n); };
-        m_usage = cost > 0 ? QStringLiteral("%1 bağlam · %2 çıktı · $%3").arg(k(in), k(out)).arg(cost, 0, 'f', 4)
-                           : QStringLiteral("%1 bağlam · %2 çıktı").arg(k(in), k(out));
+        m_usage = cost > 0 ? QCoreApplication::translate("Orbital", "%1 bağlam · %2 çıktı · $%3").arg(k(in), k(out)).arg(cost, 0, 'f', 4)
+                           : QCoreApplication::translate("Orbital", "%1 bağlam · %2 çıktı").arg(k(in), k(out));
         Q_EMIT usageChanged();
     });
     connect(e, &Engine::sessionsChanged, this, [this] { m_sessionRefresh.start(); });
@@ -537,15 +565,15 @@ static QString prettyProviderName(const QString &id, const QString &name)
     static const QHash<QString, QString> headings{
         {QStringLiteral("opencode"), QStringLiteral("ORBITAL Code")},
         {QStringLiteral("orbital-web"), QStringLiteral("ORBITAL Web")},
-        {QStringLiteral("gemini"), QStringLiteral("Google Modelleri")},
-        {QStringLiteral("google"), QStringLiteral("Google Modelleri")},
-        {QStringLiteral("openai"), QStringLiteral("OpenAI Modelleri")},
-        {QStringLiteral("anthropic"), QStringLiteral("Anthropic Modelleri")},
-        {QStringLiteral("openrouter"), QStringLiteral("OpenRouter Modelleri")},
-        {QStringLiteral("deepseek"), QStringLiteral("DeepSeek Modelleri")},
-        {QStringLiteral("groq"), QStringLiteral("Groq Modelleri")},
-        {QStringLiteral("mistral"), QStringLiteral("Mistral Modelleri")},
-        {QStringLiteral("xai"), QStringLiteral("xAI Modelleri")},
+        {QStringLiteral("gemini"), QCoreApplication::translate("Orbital", "Google Modelleri")},
+        {QStringLiteral("google"), QCoreApplication::translate("Orbital", "Google Modelleri")},
+        {QStringLiteral("openai"), QCoreApplication::translate("Orbital", "OpenAI Modelleri")},
+        {QStringLiteral("anthropic"), QCoreApplication::translate("Orbital", "Anthropic Modelleri")},
+        {QStringLiteral("openrouter"), QCoreApplication::translate("Orbital", "OpenRouter Modelleri")},
+        {QStringLiteral("deepseek"), QCoreApplication::translate("Orbital", "DeepSeek Modelleri")},
+        {QStringLiteral("groq"), QCoreApplication::translate("Orbital", "Groq Modelleri")},
+        {QStringLiteral("mistral"), QCoreApplication::translate("Orbital", "Mistral Modelleri")},
+        {QStringLiteral("xai"), QCoreApplication::translate("Orbital", "xAI Modelleri")},
     };
     return headings.value(id, name + QStringLiteral(" Modelleri"));
 }
@@ -599,8 +627,8 @@ void AppController::refreshModels()
         Q_EMIT modelChanged();
         if (models.isEmpty())
             Q_EMIT toast(m_account->signedIn()
-                             ? QStringLiteral("Hiç model bulunamadı. İnternet bağlantını kontrol et.")
-                             : QStringLiteral("Model yok: EdgeAccount ile giriş yap ya da Ayarlar → Sağlayıcılar'dan API anahtarı ekle."));
+                             ? QCoreApplication::translate("Orbital", "Hiç model bulunamadı. İnternet bağlantını kontrol et.")
+                             : QCoreApplication::translate("Orbital", "Model yok: EdgeAccount ile giriş yap ya da Ayarlar → Sağlayıcılar'dan API anahtarı ekle."));
     });
 }
 
@@ -627,38 +655,38 @@ void AppController::refreshCommands()
             const char *name;
             const char *desc;
         } kBuiltins[] = {
-            {"yayinla", "Siteyi sites.oedge.xyz'de yayınla (Kod: projenin index.html'i, Sohbet: son HTML)"},
-            {"publish", "Siteyi sites.oedge.xyz'de yayınla (Kod: projenin index.html'i, Sohbet: son HTML)"},
-            {"yardim", "Tüm / komutlarını ve özellikleri listele"},
-            {"help", "Tüm / komutlarını ve özellikleri listele"},
-            {"temizle", "Sohbeti temizle ve yeni oturum başlat"},
-            {"clear", "Sohbeti temizle ve yeni oturum başlat"},
-            {"model", "Aktif modeli göster veya değiştir (Örn: /model deepseek)"},
-            {"models", "Tüm modelleri ve kilit durumlarını listele"},
-            {"kilit-ac", "Kotası dolan modelin kilidini kaldır (/kilit-ac hepsi)"},
-            {"unlock", "Kotası dolan modelin kilidini kaldır (/unlock all)"},
-            {"durum", "Proje, aktif model, çalışma modu ve sistem durumunu göster"},
-            {"status", "Proje, aktif model, çalışma modu ve sistem durumunu göster"},
-            {"oto", "Oto-modu aç/kapat (İzin sormadan komut ve dosya işlemi)"},
-            {"auto", "Oto-modu aç/kapat (İzin sormadan komut ve dosya işlemi)"},
-            {"mod", "Çalışma modunu değiştir (Örn: /mod build veya /mod plan)"},
-            {"agent", "Çalışma modunu değiştir (Örn: /agent build veya /agent plan)"},
-            {"kaydet", "Sohbeti Markdown (.md) dosyası olarak projeye kaydet"},
-            {"export", "Sohbeti Markdown (.md) dosyası olarak projeye kaydet"},
-            {"ozet", "Sohbeti özetleyerek bağlam boyutunu küçült"},
-            {"compact", "Sohbeti özetleyerek bağlam boyutunu küçült"},
-            {"incele", "Git diff değişikliklerini incele ve hata/risk raporla"},
-            {"review", "Git diff değişikliklerini incele ve hata/risk raporla"},
-            {"duzelt", "Belirtilen hatayı veya kodu analiz edip onar (/duzelt <hata>)"},
-            {"fix", "Belirtilen hatayı veya kodu analiz edip onar (/fix <hata>)"},
-            {"commit", "Git değişikliklerine göre Conventional Commit öner"},
-            {"test", "Seçilen dosya veya fonksiyon için birim testleri yaz"},
-            {"dokuman", "Kod için açıklayıcı dokümantasyon üret"},
-            {"docs", "Kod için açıklayıcı dokümantasyon üret"}
+            {"yayinla", QT_TRANSLATE_NOOP("Orbital", "Siteyi sites.oedge.xyz'de yayınla (Kod: projenin index.html'i, Sohbet: son HTML)")},
+            {"publish", QT_TRANSLATE_NOOP("Orbital", "Siteyi sites.oedge.xyz'de yayınla (Kod: projenin index.html'i, Sohbet: son HTML)")},
+            {"yardim", QT_TRANSLATE_NOOP("Orbital", "Tüm / komutlarını ve özellikleri listele")},
+            {"help", QT_TRANSLATE_NOOP("Orbital", "Tüm / komutlarını ve özellikleri listele")},
+            {"temizle", QT_TRANSLATE_NOOP("Orbital", "Sohbeti temizle ve yeni oturum başlat")},
+            {"clear", QT_TRANSLATE_NOOP("Orbital", "Sohbeti temizle ve yeni oturum başlat")},
+            {"model", QT_TRANSLATE_NOOP("Orbital", "Aktif modeli göster veya değiştir (Örn: /model deepseek)")},
+            {"models", QT_TRANSLATE_NOOP("Orbital", "Tüm modelleri ve kilit durumlarını listele")},
+            {"kilit-ac", QT_TRANSLATE_NOOP("Orbital", "Kotası dolan modelin kilidini kaldır (/kilit-ac hepsi)")},
+            {"unlock", QT_TRANSLATE_NOOP("Orbital", "Kotası dolan modelin kilidini kaldır (/unlock all)")},
+            {"durum", QT_TRANSLATE_NOOP("Orbital", "Proje, aktif model, çalışma modu ve sistem durumunu göster")},
+            {"status", QT_TRANSLATE_NOOP("Orbital", "Proje, aktif model, çalışma modu ve sistem durumunu göster")},
+            {"oto", QT_TRANSLATE_NOOP("Orbital", "Oto-modu aç/kapat (İzin sormadan komut ve dosya işlemi)")},
+            {"auto", QT_TRANSLATE_NOOP("Orbital", "Oto-modu aç/kapat (İzin sormadan komut ve dosya işlemi)")},
+            {"mod", QT_TRANSLATE_NOOP("Orbital", "Çalışma modunu değiştir (Örn: /mod build veya /mod plan)")},
+            {"agent", QT_TRANSLATE_NOOP("Orbital", "Çalışma modunu değiştir (Örn: /agent build veya /agent plan)")},
+            {"kaydet", QT_TRANSLATE_NOOP("Orbital", "Sohbeti Markdown (.md) dosyası olarak projeye kaydet")},
+            {"export", QT_TRANSLATE_NOOP("Orbital", "Sohbeti Markdown (.md) dosyası olarak projeye kaydet")},
+            {"ozet", QT_TRANSLATE_NOOP("Orbital", "Sohbeti özetleyerek bağlam boyutunu küçült")},
+            {"compact", QT_TRANSLATE_NOOP("Orbital", "Sohbeti özetleyerek bağlam boyutunu küçült")},
+            {"incele", QT_TRANSLATE_NOOP("Orbital", "Git diff değişikliklerini incele ve hata/risk raporla")},
+            {"review", QT_TRANSLATE_NOOP("Orbital", "Git diff değişikliklerini incele ve hata/risk raporla")},
+            {"duzelt", QT_TRANSLATE_NOOP("Orbital", "Belirtilen hatayı veya kodu analiz edip onar (/duzelt <hata>)")},
+            {"fix", QT_TRANSLATE_NOOP("Orbital", "Belirtilen hatayı veya kodu analiz edip onar (/fix <hata>)")},
+            {"commit", QT_TRANSLATE_NOOP("Orbital", "Git değişikliklerine göre Conventional Commit öner")},
+            {"test", QT_TRANSLATE_NOOP("Orbital", "Seçilen dosya veya fonksiyon için birim testleri yaz")},
+            {"dokuman", QT_TRANSLATE_NOOP("Orbital", "Kod için açıklayıcı dokümantasyon üret")},
+            {"docs", QT_TRANSLATE_NOOP("Orbital", "Kod için açıklayıcı dokümantasyon üret")}
         };
         for (const auto &b : kBuiltins) {
             m_commands << QVariantMap{{QStringLiteral("name"), QString::fromUtf8(b.name)},
-                                      {QStringLiteral("description"), QString::fromUtf8(b.desc)},
+                                      {QStringLiteral("description"), QCoreApplication::translate("Orbital", b.desc)},
                                       {QStringLiteral("source"), QStringLiteral("command")}};
         }
 
@@ -889,7 +917,7 @@ QVariantList AppController::projects() const
             return;
         seen.insert(path);
         const bool isNo = (path == noFolder);
-        const QString name = isNo ? QStringLiteral("Klasörsüz (no-folder)") : QDir(path).dirName();
+        const QString name = isNo ? QCoreApplication::translate("Orbital", "Klasörsüz (no-folder)") : QDir(path).dirName();
         list.append(QVariantMap{
             {QStringLiteral("name"), name.isEmpty() ? path : name},
             {QStringLiteral("path"), path},
@@ -921,7 +949,7 @@ void AppController::submit(const QString &rawText)
     if (busy() && !m_otoGonderim) {
         m_kuyruk << trimmed;
         Q_EMIT queueChanged();
-        Q_EMIT toast(QStringLiteral("Sıraya alındı (%1). Şu anki iş bitince gönderilecek.").arg(m_kuyruk.size()));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Sıraya alındı (%1). Şu anki iş bitince gönderilecek.").arg(m_kuyruk.size()));
         return;
     }
     if (!m_otoGonderim)
@@ -955,7 +983,7 @@ void AppController::submit(const QString &rawText)
                 m_chat->clear();
                 m_engine->createSession([this, text, skills](const QString &id, const QString &error) {
                     if (id.isEmpty()) {
-                        m_chat->addError(QStringLiteral("Oturum oluşturulamadı: %1").arg(error));
+                        m_chat->addError(QCoreApplication::translate("Orbital", "Oturum oluşturulamadı: %1").arg(error));
                         return;
                     }
                     m_sessionId = id;
@@ -976,12 +1004,12 @@ void AppController::submit(const QString &rawText)
 
     if (!m_engine || !m_engineReady) {
         m_queued = trimmed;
-        Q_EMIT toast(QStringLiteral("Motor hazırlanıyor; mesajın hazır olunca gönderilecek"));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Motor hazırlanıyor; mesajın hazır olunca gönderilecek"));
         return;
     }
 
     if (isCurrentModelLocked()) {
-        Q_EMIT toast(QStringLiteral("Seçili modelin kotası dolmuş durumda (🔒). Farklı bir model seçebilir veya /kilit-ac yazabilirsiniz."));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Seçili modelin kotası dolmuş durumda (🔒). Farklı bir model seçebilir veya /kilit-ac yazabilirsiniz."));
     }
 
     QString text = trimmed;
@@ -999,7 +1027,7 @@ void AppController::submit(const QString &rawText)
         m_chat->clear();
         m_engine->createSession([this, text, skills](const QString &id, const QString &error) {
             if (id.isEmpty()) {
-                m_chat->addError(QStringLiteral("Oturum oluşturulamadı: %1").arg(error));
+                m_chat->addError(QCoreApplication::translate("Orbital", "Oturum oluşturulamadı: %1").arg(error));
                 return;
             }
             m_sessionId = id;
@@ -1139,7 +1167,7 @@ void AppController::runAction(int index)
 void AppController::copyText(const QString &text)
 {
     QGuiApplication::clipboard()->setText(text);
-    Q_EMIT toast(QStringLiteral("Panoya kopyalandı"));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "Panoya kopyalandı"));
 }
 
 void AppController::openLink(const QString &link)
@@ -1147,7 +1175,7 @@ void AppController::openLink(const QString &link)
     QUrl url = QUrl::fromUserInput(link);
     const QString scheme = url.scheme().toLower();
     if (scheme != QLatin1String("http") && scheme != QLatin1String("https") && scheme != QLatin1String("mailto")) {
-        Q_EMIT toast(QStringLiteral("Bu bağlantı türü açılamaz: %1").arg(link.left(80)));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Bu bağlantı türü açılamaz: %1").arg(link.left(80)));
         return;
     }
     if (qEnvironmentVariableIsSet("ORBITAL_SCREENSHOT")) { // test runs: don't launch a browser
@@ -1189,7 +1217,7 @@ void AppController::disableAutoMode()
         return;
     setPluginEnabled(id, false);
     applySettings();
-    Q_EMIT toast(QStringLiteral("Oto-mod kapatıldı; Orbital riskli adımlardan önce yine izin isteyecek"));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "Oto-mod kapatıldı; Orbital riskli adımlardan önce yine izin isteyecek"));
 }
 
 void AppController::openPath(const QString &path)
@@ -1235,7 +1263,7 @@ void AppController::toggleAutoMode()
     } else {
         setPluginEnabled(QStringLiteral("oto-mod"), true);
         applySettings();
-        Q_EMIT toast(QStringLiteral("Oto-mod açıldı ⚡; Orbital artık izin istemeden çalışacak"));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Oto-mod açıldı ⚡; Orbital artık izin istemeden çalışacak"));
     }
 }
 
@@ -1334,9 +1362,9 @@ void AppController::expireLocks()
         return;
     syncLockFlags();
     Q_EMIT toast(freed.size() == 1
-                     ? QStringLiteral("🔓 %1 modelinin limiti sıfırlandı, tekrar kullanılabilir.")
+                     ? QCoreApplication::translate("Orbital", "🔓 %1 modelinin limiti sıfırlandı, tekrar kullanılabilir.")
                            .arg(prettyModelName(freed.first().section(QLatin1Char('/'), 1), nullptr))
-                     : QStringLiteral("🔓 %1 modelin limiti sıfırlandı.").arg(freed.size()));
+                     : QCoreApplication::translate("Orbital", "🔓 %1 modelin limiti sıfırlandı.").arg(freed.size()));
 }
 
 // First usable model after a lock: free OpenCode models, then cheap fast models, then anything unlocked.
@@ -1404,12 +1432,12 @@ void AppController::lockModel(const QString &ref, const QString &reason)
                 if (v.toMap().value(QStringLiteral("ref")).toString() == fallback)
                     fallbackName = v.toMap().value(QStringLiteral("name")).toString();
             setModel(fallback);
-            Q_EMIT toast(QStringLiteral("Model limiti doldu (🔒 %1'e kadar): %2 → %3 modeline geçildi.")
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Model limiti doldu (🔒 %1'e kadar): %2 → %3 modeline geçildi.")
                              .arg(lockText(ref), shown, fallbackName.isEmpty() ? fallback : fallbackName));
             return;
         }
     }
-    Q_EMIT toast(QStringLiteral("Model limiti doldu (🔒): %1, %2'de kendiliğinden açılır.").arg(shown, lockText(ref)));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "Model limiti doldu (🔒): %1, %2'de kendiliğinden açılır.").arg(shown, lockText(ref)));
 }
 
 void AppController::unlockModel(const QString &ref)
@@ -1527,7 +1555,7 @@ QString AppController::projectSiteHtml(const QString &arg, QString *title, QStri
     if (!arg.isEmpty()) {
         file = resolveLocal(QDir(root), root, arg);
         if (file.isEmpty()) {
-            *error = QStringLiteral("`%1` projede bulunamadı.").arg(arg);
+            *error = QCoreApplication::translate("Orbital", "`%1` projede bulunamadı.").arg(arg);
             return {};
         }
     } else {
@@ -1540,12 +1568,12 @@ QString AppController::projectSiteHtml(const QString &arg, QString *title, QStri
             }
         }
         if (file.isEmpty()) {
-            *error = QStringLiteral("Projede `index.html` yok. Yayınlanacak dosyayı yaz: `/yayinla sayfa.html`");
+            *error = QCoreApplication::translate("Orbital", "Projede `index.html` yok. Yayınlanacak dosyayı yaz: `/yayinla sayfa.html`");
             return {};
         }
     }
     if (QFileInfo(file).size() > 8 * 1024 * 1024) {
-        *error = QStringLiteral("`%1` çok büyük (8 MB sınırı).").arg(QDir(root).relativeFilePath(file));
+        *error = QCoreApplication::translate("Orbital", "`%1` çok büyük (8 MB sınırı).").arg(QDir(root).relativeFilePath(file));
         return {};
     }
     const QDir base = QFileInfo(file).absoluteDir();
@@ -1630,7 +1658,7 @@ void AppController::publishSite(const QString &htmlIn, const QString &titleIn)
     const QString token = EdgeAccount::token();
     if (token.isEmpty()) {
         m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                        QStringLiteral("Site yayınlamak için önce **EdgeAccount ile giriş yap** (sol alttaki hesap düğmesi)."));
+                        QCoreApplication::translate("Orbital", "Site yayınlamak için önce **EdgeAccount ile giriş yap** (sol alttaki hesap düğmesi)."));
         Q_EMIT scrollToEnd();
         return;
     }
@@ -1640,7 +1668,7 @@ void AppController::publishSite(const QString &htmlIn, const QString &titleIn)
         if (isNoFolder()) {
             html = m_chat->lastHtmlBlock();
             if (html.isEmpty())
-                error = QStringLiteral("Bu sohbette yayınlanacak bir HTML sayfası yok. Önce ORBITAL'a bir sayfa yazdır "
+                error = QCoreApplication::translate("Orbital", "Bu sohbette yayınlanacak bir HTML sayfası yok. Önce ORBITAL'a bir sayfa yazdır "
                                        "(örn. *\"kahve dükkânım için tek sayfalık site yap\"*), sonra `/yayinla` yaz.");
         } else {
             html = projectSiteHtml(QString(), &title, &error);
@@ -1652,7 +1680,7 @@ void AppController::publishSite(const QString &htmlIn, const QString &titleIn)
         return;
     }
     if (html.size() > 20 * 1024 * 1024) {
-        Q_EMIT toast(QStringLiteral("Sayfa 20 MB'tan büyük; yayınlanamadı."));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Sayfa 20 MB'tan büyük; yayınlanamadı."));
         return;
     }
     if (title.isEmpty()) {
@@ -1662,7 +1690,7 @@ void AppController::publishSite(const QString &htmlIn, const QString &titleIn)
 
     m_publishing = true;
     Q_EMIT publishingChanged();
-    Q_EMIT toast(QStringLiteral("Yayınlanıyor…"));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "Yayınlanıyor…"));
     QNetworkRequest req(QUrl(webBaseUrl() + QStringLiteral("/api/publish-site")));
     req.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
     req.setRawHeader("Authorization", "Bearer " + token.toUtf8());
@@ -1680,19 +1708,19 @@ void AppController::publishSite(const QString &htmlIn, const QString &titleIn)
         if (status == 200 && o.value(QStringLiteral("success")).toBool()) {
             const QString url = o.value(QStringLiteral("url")).toString();
             copyText(url);
-            m_chat->setText(key, QStringLiteral("### 🌐 Site yayında\n\n**[%1](%1)**\n\n"
+            m_chat->setText(key, QCoreApplication::translate("Orbital", "### 🌐 Site yayında\n\n**[%1](%1)**\n\n"
                                                 "Adres panoya kopyalandı. Her yayın yeni bir numara alır; "
                                                 "değişiklikten sonra `/yayinla` ile yeniden yayınlayabilirsin.")
                                      .arg(url));
-            Q_EMIT toast(QStringLiteral("Yayınlandı: %1").arg(url));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Yayınlandı: %1").arg(url));
         } else {
             QString msg = o.value(QStringLiteral("error")).toString();
             if (status == 401)
-                msg = QStringLiteral("Oturumun geçersiz; EdgeAccount ile yeniden giriş yap.");
+                msg = QCoreApplication::translate("Orbital", "Oturumun geçersiz; EdgeAccount ile yeniden giriş yap.");
             else if (msg.isEmpty())
                 msg = reply->errorString();
-            m_chat->setText(key, QStringLiteral("Yayınlanamadı: %1").arg(msg));
-            Q_EMIT toast(QStringLiteral("Yayınlanamadı"));
+            m_chat->setText(key, QCoreApplication::translate("Orbital", "Yayınlanamadı: %1").arg(msg));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Yayınlanamadı"));
         }
         Q_EMIT scrollToEnd();
     });
@@ -1723,8 +1751,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     // 1. /yardim, /help
     if (cmd == QLatin1String("yardim") || cmd == QLatin1String("help")) {
         m_chat->addUser(QStringLiteral("/") + name + (args.isEmpty() ? QString() : QLatin1Char(' ') + args), {});
-        QString help = QStringLiteral(
-            "### ⚡ Orbital Slash Komutları\n\n"
+        QString help = QCoreApplication::translate("Orbital", "### ⚡ Orbital Slash Komutları\n\n"
             "Aşağıdaki komutları doğrudan sohbet kutusuna yazarak kullanabilirsiniz:\n\n"
             "| Komut | Açıklama |\n"
             "| :--- | :--- |\n"
@@ -1744,8 +1771,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
             "| `/commit [mesaj]` | Git değişikliklerine göre Conventional Commit önerir |\n"
             "| `/test [dosya]` | Belirtilen kod için birim testleri (unit tests) yazar |\n"
             "| `/dokuman`, `/docs [dosya]` | Kod için kapsamlı dokümantasyon üretir |\n\n"
-            "💡 *Ayrıca `/limitsiz` veya `/figma-mcp` gibi yüklü skillerin adını yazarak o skilli iliştirebilirsiniz.*"
-        );
+            "💡 *Ayrıca `/limitsiz` veya `/figma-mcp` gibi yüklü skillerin adını yazarak o skilli iliştirebilirsiniz.*");
         m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), help);
         Q_EMIT scrollToEnd();
         return true;
@@ -1754,7 +1780,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     // 2. /temizle, /clear
     if (cmd == QLatin1String("temizle") || cmd == QLatin1String("clear")) {
         newChat();
-        Q_EMIT toast(QStringLiteral("Sohbet geçmişi temizlendi"));
+        Q_EMIT toast(QCoreApplication::translate("Orbital", "Sohbet geçmişi temizlendi"));
         return true;
     }
 
@@ -1762,8 +1788,8 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     if (cmd == QLatin1String("model")) {
         if (args.isEmpty()) {
             m_chat->addUser(QStringLiteral("/model"), {});
-            const QString status = isCurrentModelLocked() ? QStringLiteral("🔒 Limit/Kota Doldu") : QStringLiteral("Aktif");
-            const QString reply = QStringLiteral("### 🤖 Aktif Model Bilgisi\n"
+            const QString status = isCurrentModelLocked() ? QCoreApplication::translate("Orbital", "🔒 Limit/Kota Doldu") : QCoreApplication::translate("Orbital", "Aktif");
+            const QString reply = QCoreApplication::translate("Orbital", "### 🤖 Aktif Model Bilgisi\n"
                                                  "- **Model:** %1\n"
                                                  "- **Referans:** `%2`\n"
                                                  "- **Durum:** %3\n\n"
@@ -1793,16 +1819,16 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
         if (!targetRef.isEmpty()) {
             setModel(targetRef);
             m_chat->addUser(QStringLiteral("/model ") + args, {});
-            QString reply = QStringLiteral("✅ Aktif model **%1** (`%2`) olarak ayarlandı.").arg(targetName, targetRef);
+            QString reply = QCoreApplication::translate("Orbital", "✅ Aktif model **%1** (`%2`) olarak ayarlandı.").arg(targetName, targetRef);
             if (targetLocked) {
-                reply += QStringLiteral("\n\n⚠️ **Dikkat:** Bu modelin kotası dolmuş olarak işaretlenmiş (🔒). Kilidi açmak için `/kilit-ac %1` yazabilirsiniz.").arg(targetRef);
+                reply += QCoreApplication::translate("Orbital", "\n\n⚠️ **Dikkat:** Bu modelin kotası dolmuş olarak işaretlenmiş (🔒). Kilidi açmak için `/kilit-ac %1` yazabilirsiniz.").arg(targetRef);
             }
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), reply);
             Q_EMIT scrollToEnd();
-            Q_EMIT toast(QStringLiteral("Model '%1' olarak ayarlandı").arg(targetName));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Model '%1' olarak ayarlandı").arg(targetName));
         } else {
             m_chat->addUser(QStringLiteral("/model ") + args, {});
-            m_chat->addError(QStringLiteral("'%1' aramasına uygun model bulunamadı. Kullanılabilir modelleri görmek için /models yazın.").arg(args));
+            m_chat->addError(QCoreApplication::translate("Orbital", "'%1' aramasına uygun model bulunamadı. Kullanılabilir modelleri görmek için /models yazın.").arg(args));
             Q_EMIT scrollToEnd();
         }
         return true;
@@ -1811,7 +1837,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     // 4. /models
     if (cmd == QLatin1String("models")) {
         m_chat->addUser(QStringLiteral("/models"), {});
-        QString out = QStringLiteral("### 📋 Kullanılabilir Modeller\n\n");
+        QString out = QCoreApplication::translate("Orbital", "### 📋 Kullanılabilir Modeller\n\n");
         QString lastProvider;
         for (const QVariant &v : std::as_const(m_models)) {
             const QVariantMap m = v.toMap();
@@ -1827,10 +1853,10 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
                        .arg(isCur ? QStringLiteral("👉") : QStringLiteral("•"),
                             m.value(QStringLiteral("name")).toString(),
                             m.value(QStringLiteral("ref")).toString(),
-                            isFree ? QStringLiteral("✨ *Ücretsiz*") : QString(),
-                            isLocked ? QStringLiteral("🔒 **[Limit Doldu]**") : QString());
+                            isFree ? QCoreApplication::translate("Orbital", "✨ *Ücretsiz*") : QString(),
+                            isLocked ? QCoreApplication::translate("Orbital", "🔒 **[Limit Doldu]**") : QString());
         }
-        out += QStringLiteral("\n*Modeli seçmek için `/model <isim>` yazabilirsiniz.*");
+        out += QCoreApplication::translate("Orbital", "\n*Modeli seçmek için `/model <isim>` yazabilirsiniz.*");
         m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), out);
         Q_EMIT scrollToEnd();
         return true;
@@ -1842,8 +1868,8 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
         if (args.isEmpty() || args.compare(QLatin1String("hepsi"), Qt::CaseInsensitive) == 0 || args.compare(QLatin1String("all"), Qt::CaseInsensitive) == 0) {
             unlockAllModels();
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                            QStringLiteral("🔓 **Tüm modellerin kilitleri kaldırıldı.** Artık modelleri tekrar deneyebilirsiniz."));
-            Q_EMIT toast(QStringLiteral("Tüm model kilitleri açıldı"));
+                            QCoreApplication::translate("Orbital", "🔓 **Tüm modellerin kilitleri kaldırıldı.** Artık modelleri tekrar deneyebilirsiniz."));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Tüm model kilitleri açıldı"));
         } else {
             QString matchedRef;
             for (const QString &r : m_lockedModels.keys()) {
@@ -1856,8 +1882,8 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
                 matchedRef = args;
             unlockModel(matchedRef);
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                            QStringLiteral("🔓 **%1** modelinin kilidi kaldırıldı.").arg(matchedRef));
-            Q_EMIT toast(QStringLiteral("Model kilidi açıldı: %1").arg(matchedRef));
+                            QCoreApplication::translate("Orbital", "🔓 **%1** modelinin kilidi kaldırıldı.").arg(matchedRef));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Model kilidi açıldı: %1").arg(matchedRef));
         }
         Q_EMIT scrollToEnd();
         return true;
@@ -1868,15 +1894,14 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
         m_chat->addUser(QStringLiteral("/") + name, {});
         QString lockedStr;
         if (m_lockedModels.isEmpty()) {
-            lockedStr = QStringLiteral("*Kilitli model yok*");
+            lockedStr = QCoreApplication::translate("Orbital", "*Kilitli model yok*");
         } else {
             QStringList l;
             for (auto it = m_lockedModels.cbegin(); it != m_lockedModels.cend(); ++it)
-                l << QStringLiteral("`%1` 🔒 (%2'de açılır)").arg(it.key(), lockText(it.key()));
+                l << QCoreApplication::translate("Orbital", "`%1` 🔒 (%2'de açılır)").arg(it.key(), lockText(it.key()));
             lockedStr = l.join(QStringLiteral(", "));
         }
-        QString statusText = QStringLiteral(
-            "### 📊 Orbital Sistem Durumu\n\n"
+        QString statusText = QCoreApplication::translate("Orbital", "### 📊 Orbital Sistem Durumu\n\n"
             "- **Sürüm:** `v%14`\n"
             "- **Çalışma Alanı:** `%1` (%2)\n"
             "- **Aktif Motor:** `%3` (%4)\n"
@@ -1885,17 +1910,16 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
             "- **Oto-Mod (İzin İstememe):** %10\n"
             "- **Kilitli Modeller:** %11\n"
             "- **Bağlı Skiller:** %12\n"
-            "- **Token Kullanımı:** %13\n"
-        ).arg(projectName(), projectPath(),
+            "- **Token Kullanımı:** %13\n").arg(projectName(), projectPath(),
               engineId() == QLatin1String("opencode") ? QStringLiteral("ORBITAL") : QStringLiteral("Orbital Core"),
-              engineReady() ? QStringLiteral("Hazır") : QStringLiteral("Başlatılıyor"),
-              modelLabel(), modelRef(), isCurrentModelLocked() ? QStringLiteral("🔒 **[Limit/Kota Doldu]**") : QStringLiteral("✅ Normal"),
+              engineReady() ? QCoreApplication::translate("Orbital", "Hazır") : QCoreApplication::translate("Orbital", "Başlatılıyor"),
+              modelLabel(), modelRef(), isCurrentModelLocked() ? QCoreApplication::translate("Orbital", "🔒 **[Limit/Kota Doldu]**") : QCoreApplication::translate("Orbital", "✅ Normal"),
               m_agent == QLatin1String("build") ? QStringLiteral("Build") : QStringLiteral("Plan"),
-              m_agent == QLatin1String("build") ? QStringLiteral("Dosya yazar, komut çalıştırır") : QStringLiteral("Yalnızca okur ve plan çıkarır"),
-              autoMode() ? QStringLiteral("⚡ **Açık** (İzin istemez)") : QStringLiteral("Kapalı (Güvenli mod)"),
+              m_agent == QLatin1String("build") ? QCoreApplication::translate("Orbital", "Dosya yazar, komut çalıştırır") : QCoreApplication::translate("Orbital", "Yalnızca okur ve plan çıkarır"),
+              autoMode() ? QCoreApplication::translate("Orbital", "⚡ **Açık** (İzin istemez)") : QCoreApplication::translate("Orbital", "Kapalı (Güvenli mod)"),
               lockedStr,
-              m_attached.isEmpty() ? QStringLiteral("*Yok*") : m_attached.join(QStringLiteral(", ")),
-              m_usage.isEmpty() ? QStringLiteral("0 token") : m_usage)
+              m_attached.isEmpty() ? QCoreApplication::translate("Orbital", "*Yok*") : m_attached.join(QStringLiteral(", ")),
+              m_usage.isEmpty() ? QCoreApplication::translate("Orbital", "0 token") : m_usage)
             .arg(appVersion());
 
         m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), statusText);
@@ -1908,8 +1932,8 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
         toggleAutoMode();
         m_chat->addUser(QStringLiteral("/") + name, {});
         const QString msg = autoMode()
-            ? QStringLiteral("⚡ **Oto-mod açıldı.** Orbital artık komut çalıştırma ve dosya düzenleme işlemleri için onay sormadan ilerleyecektir.")
-            : QStringLiteral("🛡️ **Oto-mod kapatıldı.** Orbital kritik dosya ve komut işlemlerinden önce onay isteyecektir.");
+            ? QCoreApplication::translate("Orbital", "⚡ **Oto-mod açıldı.** Orbital artık komut çalıştırma ve dosya düzenleme işlemleri için onay sormadan ilerleyecektir.")
+            : QCoreApplication::translate("Orbital", "🛡️ **Oto-mod kapatıldı.** Orbital kritik dosya ve komut işlemlerinden önce onay isteyecektir.");
         m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()), msg);
         Q_EMIT scrollToEnd();
         return true;
@@ -1921,14 +1945,14 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
         if (args.compare(QLatin1String("plan"), Qt::CaseInsensitive) == 0) {
             setAgent(QStringLiteral("plan"));
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                            QStringLiteral("🔍 Çalışma modu **Plan** olarak ayarlandı. Orbital yalnızca okuma yapıp plan hazırlayacak."));
+                            QCoreApplication::translate("Orbital", "🔍 Çalışma modu **Plan** olarak ayarlandı. Orbital yalnızca okuma yapıp plan hazırlayacak."));
         } else if (args.compare(QLatin1String("build"), Qt::CaseInsensitive) == 0) {
             setAgent(QStringLiteral("build"));
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                            QStringLiteral("🔨 Çalışma modu **Build** olarak ayarlandı. Orbital dosyaları düzenleyebilir ve komutları çalıştırabilir."));
+                            QCoreApplication::translate("Orbital", "🔨 Çalışma modu **Build** olarak ayarlandı. Orbital dosyaları düzenleyebilir ve komutları çalıştırabilir."));
         } else {
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                            QStringLiteral("Kullanım: `/mod build` veya `/mod plan`. (Şu anki mod: **%1**)").arg(m_agent));
+                            QCoreApplication::translate("Orbital", "Kullanım: `/mod build` veya `/mod plan`. (Şu anki mod: **%1**)").arg(m_agent));
         }
         Q_EMIT scrollToEnd();
         return true;
@@ -1947,10 +1971,10 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
             f.write(m_chat->exportMarkdown(m_sessionTitle, projectName()).toUtf8());
             f.close();
             m_chat->setText(QStringLiteral("cmd_") + QString::number(QDateTime::currentMSecsSinceEpoch()),
-                            QStringLiteral("💾 **Sohbet başarıyla kaydedildi:**\n`%1`").arg(fullPath));
-            Q_EMIT toast(QStringLiteral("Sohbet kaydedildi: %1").arg(filename));
+                            QCoreApplication::translate("Orbital", "💾 **Sohbet başarıyla kaydedildi:**\n`%1`").arg(fullPath));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Sohbet kaydedildi: %1").arg(filename));
         } else {
-            m_chat->addError(QStringLiteral("Dosya kaydedilemedi: %1").arg(f.errorString()));
+            m_chat->addError(QCoreApplication::translate("Orbital", "Dosya kaydedilemedi: %1").arg(f.errorString()));
         }
         Q_EMIT scrollToEnd();
         return true;
@@ -1959,7 +1983,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     // AI-Assisted Prompt Commands
     // 10. /ozet, /compact
     if (cmd == QLatin1String("ozet") || cmd == QLatin1String("compact")) {
-        const QString prompt = QStringLiteral("Lütfen şu ana kadarki sohbetimizin ana hatlarını, alınan teknik kararları, "
+        const QString prompt = QCoreApplication::translate("Orbital", "Lütfen şu ana kadarki sohbetimizin ana hatlarını, alınan teknik kararları, "
                                               "yapılan değişiklikleri ve sıradaki adımları net, maddeler halinde ve kompakt bir şekilde özetle.");
         submit(prompt);
         return true;
@@ -1967,7 +1991,7 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
 
     // 11. /incele, /review
     if (cmd == QLatin1String("incele") || cmd == QLatin1String("review")) {
-        QString prompt = QStringLiteral("Lütfen çalışma alanındaki commit edilmemiş değişiklikleri (`git diff` ve `git status`) incele. "
+        QString prompt = QCoreApplication::translate("Orbital", "Lütfen çalışma alanındaki commit edilmemiş değişiklikleri (`git diff` ve `git status`) incele. "
                                         "Olası mantık hatalarını, güvenlik açıklarını, performans risklerini ve eksik testleri önem sırasına göre raporla.");
         if (!args.isEmpty())
             prompt += QStringLiteral(" Ekstra talimat: %1").arg(args);
@@ -1979,21 +2003,21 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     if (cmd == QLatin1String("duzelt") || cmd == QLatin1String("fix")) {
         if (args.isEmpty()) {
             m_chat->addUser(QStringLiteral("/") + name, {});
-            m_chat->addError(QStringLiteral("Kullanım: `/duzelt <hata mesajı veya dosya>`"));
+            m_chat->addError(QCoreApplication::translate("Orbital", "Kullanım: `/duzelt <hata mesajı veya dosya>`"));
             Q_EMIT scrollToEnd();
             return true;
         }
-        const QString prompt = QStringLiteral("Lütfen şu hatayı veya sorunu detaylıca analiz edip adım adım onar: %1").arg(args);
+        const QString prompt = QCoreApplication::translate("Orbital", "Lütfen şu hatayı veya sorunu detaylıca analiz edip adım adım onar: %1").arg(args);
         submit(prompt);
         return true;
     }
 
     // 13. /commit
     if (cmd == QLatin1String("commit")) {
-        QString prompt = QStringLiteral("Lütfen `git status` ve `git diff` ile yapılan son değişiklikleri incele. "
+        QString prompt = QCoreApplication::translate("Orbital", "Lütfen `git status` ve `git diff` ile yapılan son değişiklikleri incele. "
                                         "Conventional Commits standardına uygun (feat, fix, docs, refactor vb.), açıklayıcı bir commit mesajı öner.");
         if (!args.isEmpty())
-            prompt += QStringLiteral(" Kullanıcı notu: %1").arg(args);
+            prompt += QCoreApplication::translate("Orbital", " Kullanıcı notu: %1").arg(args);
         submit(prompt);
         return true;
     }
@@ -2002,11 +2026,11 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     if (cmd == QLatin1String("test")) {
         if (args.isEmpty()) {
             m_chat->addUser(QStringLiteral("/") + name, {});
-            m_chat->addError(QStringLiteral("Kullanım: `/test <dosya veya fonksiyon adı>`"));
+            m_chat->addError(QCoreApplication::translate("Orbital", "Kullanım: `/test <dosya veya fonksiyon adı>`"));
             Q_EMIT scrollToEnd();
             return true;
         }
-        const QString prompt = QStringLiteral("Lütfen şu dosya veya bileşen için kapsamlı, uç durumları kapsayan birim testleri (unit test) yaz: %1").arg(args);
+        const QString prompt = QCoreApplication::translate("Orbital", "Lütfen şu dosya veya bileşen için kapsamlı, uç durumları kapsayan birim testleri (unit test) yaz: %1").arg(args);
         submit(prompt);
         return true;
     }
@@ -2015,11 +2039,11 @@ bool AppController::handleSlashCommand(const QString &name, const QString &args)
     if (cmd == QLatin1String("dokuman") || cmd == QLatin1String("docs")) {
         if (args.isEmpty()) {
             m_chat->addUser(QStringLiteral("/") + name, {});
-            m_chat->addError(QStringLiteral("Kullanım: `/dokuman <dosya veya kod>`"));
+            m_chat->addError(QCoreApplication::translate("Orbital", "Kullanım: `/dokuman <dosya veya kod>`"));
             Q_EMIT scrollToEnd();
             return true;
         }
-        const QString prompt = QStringLiteral("Lütfen şu dosya veya kod parçası için kapsamlı dokümantasyon, kullanım örnekleri ve açıklamalar hazırla: %1").arg(args);
+        const QString prompt = QCoreApplication::translate("Orbital", "Lütfen şu dosya veya kod parçası için kapsamlı dokümantasyon, kullanım örnekleri ve açıklamalar hazırla: %1").arg(args);
         submit(prompt);
         return true;
     }
@@ -2043,14 +2067,14 @@ void AppController::renameSession(const QString &id, const QString &newTitle)
         return;
     m_engine->renameSession(id, trimmed, [this, id, trimmed](const QString &error) {
         if (!error.isEmpty()) {
-            Q_EMIT toast(QStringLiteral("Yeniden adlandırılamadı: %1").arg(error));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Yeniden adlandırılamadı: %1").arg(error));
         } else {
             if (id == m_sessionId) {
                 m_sessionTitle = trimmed;
                 Q_EMIT sessionChanged();
             }
             refreshSessions();
-            Q_EMIT toast(QStringLiteral("Sohbet adı güncellendi"));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Sohbet adı güncellendi"));
         }
     });
 }
@@ -2059,7 +2083,7 @@ void AppController::exportChatAsMarkdown()
 {
     const QString md = m_chat->exportMarkdown(m_sessionTitle, projectName());
     copyText(md);
-    Q_EMIT toast(QStringLiteral("Sohbet Markdown olarak panoya kopyalandı"));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "Sohbet Markdown olarak panoya kopyalandı"));
 }
 
 QString AppController::formatDroppedUrl(const QUrl &url) const
@@ -2137,9 +2161,9 @@ void AppController::githubGet(const QUrl &url, std::function<void(const QByteArr
         reply->deleteLater();
         const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         if (status == 404)
-            done({}, QStringLiteral("Bulunamadı (depo gizli ya da adres yanlış olabilir)."));
+            done({}, QCoreApplication::translate("Orbital", "Bulunamadı (depo gizli ya da adres yanlış olabilir)."));
         else if (status == 403 || status == 429)
-            done({}, QStringLiteral("GitHub istek sınırına ulaşıldı, biraz sonra tekrar dene."));
+            done({}, QCoreApplication::translate("Orbital", "GitHub istek sınırına ulaşıldı, biraz sonra tekrar dene."));
         else if (reply->error() != QNetworkReply::NoError)
             done({}, reply->errorString());
         else
@@ -2158,7 +2182,7 @@ void AppController::installSkillFromGitHub(const QString &input)
     if (!m.hasMatch())
         m = shorthand.match(text);
     if (!m.hasMatch()) {
-        Q_EMIT githubSkillDone(false, QStringLiteral("Geçerli bir GitHub adresi gir (ör. github.com/kullanıcı/depo)."));
+        Q_EMIT githubSkillDone(false, QCoreApplication::translate("Orbital", "Geçerli bir GitHub adresi gir (ör. github.com/kullanıcı/depo)."));
         return;
     }
     const QString owner = m.captured(1), repo = m.captured(2);
@@ -2193,11 +2217,11 @@ void AppController::installSkillFromGitHub(const QString &input)
                 m_settingsDirty = true;
                 refreshCommands();
                 if (installed.isEmpty())
-                    fail(errors.value(0, QStringLiteral("Skill yüklenemedi.")));
+                    fail(errors.value(0, QCoreApplication::translate("Orbital", "Skill yüklenemedi.")));
                 else
                     Q_EMIT githubSkillDone(true, installed.size() == 1
-                                                     ? QStringLiteral("'%1' skill'i yüklendi.").arg(installed.first())
-                                                     : QStringLiteral("%1 skill yüklendi: %2").arg(installed.size()).arg(installed.join(QStringLiteral(", "))));
+                                                     ? QCoreApplication::translate("Orbital", "'%1' skill'i yüklendi.").arg(installed.first())
+                                                     : QCoreApplication::translate("Orbital", "%1 skill yüklendi: %2").arg(installed.size()).arg(installed.join(QStringLiteral(", "))));
                 return;
             }
             const QString file = remaining->takeFirst();
@@ -2245,7 +2269,7 @@ void AppController::installSkillFromGitHub(const QString &input)
                     skillDirs << (p.contains(QLatin1Char('/')) ? p.section(QLatin1Char('/'), 0, -2) : QString());
             }
             if (skillDirs.isEmpty())
-                return fail(QStringLiteral("Bu adreste SKILL.md içeren bir klasör bulunamadı."));
+                return fail(QCoreApplication::translate("Orbital", "Bu adreste SKILL.md içeren bir klasör bulunamadı."));
             // A skill folder nested inside another one belongs to its parent.
             std::sort(skillDirs.begin(), skillDirs.end());
             QStringList roots;
@@ -2253,7 +2277,7 @@ void AppController::installSkillFromGitHub(const QString &input)
                 if (std::none_of(roots.begin(), roots.end(), [&d](const QString &r) { return r.isEmpty() || d.startsWith(r + QLatin1Char('/')); }))
                     roots << d;
             if (roots.size() > 50)
-                return fail(QStringLiteral("Bu adreste çok fazla skill var (%1); belirli bir klasörün adresini gir.").arg(roots.size()));
+                return fail(QCoreApplication::translate("Orbital", "Bu adreste çok fazla skill var (%1); belirli bir klasörün adresini gir.").arg(roots.size()));
             QStringList files;
             qint64 total = 0;
             for (const auto &[p, size] : std::as_const(blobs)) {
@@ -2263,7 +2287,7 @@ void AppController::installSkillFromGitHub(const QString &input)
                 total += size;
             }
             if (files.size() > 500 || total > 30 * 1024 * 1024)
-                return fail(QStringLiteral("Skill dosyaları çok büyük (%1 dosya, %2 MB).").arg(files.size()).arg(total / (1024 * 1024)));
+                return fail(QCoreApplication::translate("Orbital", "Skill dosyaları çok büyük (%1 dosya, %2 MB).").arg(files.size()).arg(total / (1024 * 1024)));
             download(ref, roots, files);
         });
     };
@@ -2412,7 +2436,7 @@ void AppController::connectProvider(const QString &id, const QString &apiKey)
     const ProviderPreset *preset = findPreset(id);
     const QJsonObject existing = Config::raw().value(QStringLiteral("providers")).toObject().value(id).toObject();
     if (!preset && existing.isEmpty()) {
-        Q_EMIT providerResult(id, false, QStringLiteral("Bilinmeyen sağlayıcı."));
+        Q_EMIT providerResult(id, false, QCoreApplication::translate("Orbital", "Bilinmeyen sağlayıcı."));
         return;
     }
     ProviderConfig p;
@@ -2423,7 +2447,7 @@ void AppController::connectProvider(const QString &id, const QString &apiKey)
     p.modelFilter = preset ? QString::fromLatin1(preset->modelFilter) : existing.value(QStringLiteral("modelFilter")).toString();
     p.apiKey = apiKey.trimmed();
     if (p.apiKey.isEmpty()) {
-        Q_EMIT providerResult(id, false, QStringLiteral("API anahtarını yapıştır."));
+        Q_EMIT providerResult(id, false, QCoreApplication::translate("Orbital", "API anahtarını yapıştır."));
         return;
     }
     testProvider(m_nam, p, [this, p](bool ok, const QString &message, const QStringList &models) {
@@ -2453,7 +2477,7 @@ void AppController::addCustomProvider(const QString &name, const QString &baseUr
 {
     const QString id = SkillManager::sanitizeName(name);
     if (id.isEmpty() || baseUrl.trimmed().isEmpty()) {
-        Q_EMIT providerResult(QStringLiteral("custom"), false, QStringLiteral("Ad ve adres gerekli."));
+        Q_EMIT providerResult(QStringLiteral("custom"), false, QCoreApplication::translate("Orbital", "Ad ve adres gerekli."));
         return;
     }
     QString url = baseUrl.trimmed();
@@ -2672,11 +2696,11 @@ void AppController::loadStore()
     fetchStoreFile(QStringLiteral("index.json"), [this](const QByteArray &data, const QString &error) {
         m_storeLoading = false;
         if (!error.isEmpty()) {
-            m_storeError = QStringLiteral("Mağazaya ulaşılamadı: %1").arg(error);
+            m_storeError = QCoreApplication::translate("Orbital", "Mağazaya ulaşılamadı: %1").arg(error);
         } else {
             m_store = QJsonDocument::fromJson(data).object().value(QStringLiteral("items")).toArray().toVariantList();
             if (m_store.isEmpty())
-                m_storeError = QStringLiteral("Mağaza kataloğu okunamadı.");
+                m_storeError = QCoreApplication::translate("Orbital", "Mağaza kataloğu okunamadı.");
         }
         Q_EMIT storeChanged();
     });
@@ -2776,7 +2800,7 @@ void AppController::installStoreItem(const QString &id)
                     applySettings(); // plugins hook into the engine at startup
                 else
                     m_settingsDirty = true;
-                Q_EMIT storeItemDone(id, true, QStringLiteral("Yüklendi"));
+                Q_EMIT storeItemDone(id, true, QCoreApplication::translate("Orbital", "Yüklendi"));
             } else {
                 QDir(staging).removeRecursively();
                 Q_EMIT storeItemDone(id, false, *failed);
@@ -2787,14 +2811,14 @@ void AppController::installStoreItem(const QString &id)
         }
         const QString rel = remaining->takeFirst();
         if (rel.contains(QStringLiteral(".."))) {
-            *failed = QStringLiteral("Geçersiz dosya yolu: %1").arg(rel);
+            *failed = QCoreApplication::translate("Orbital", "Geçersiz dosya yolu: %1").arg(rel);
             (*next)();
             return;
         }
         fetchStoreFile(type + QStringLiteral("s/") + id + QLatin1Char('/') + rel,
                        [staging, rel, failed, next](const QByteArray &data, const QString &error) {
                            if (!error.isEmpty()) {
-                               *failed = QStringLiteral("İndirilemedi (%1): %2").arg(rel, error);
+                               *failed = QCoreApplication::translate("Orbital", "İndirilemedi (%1): %2").arg(rel, error);
                            } else {
                                const QString path = staging + QLatin1Char('/') + rel;
                                QDir().mkpath(QFileInfo(path).absolutePath());
@@ -2828,7 +2852,7 @@ void AppController::removeStoreItem(const QString &id)
         m_settingsDirty = true;
         if (type == QLatin1String("plugin"))
             applySettings();
-        Q_EMIT storeItemDone(id, ok, ok ? QStringLiteral("Kaldırıldı") : error);
+        Q_EMIT storeItemDone(id, ok, ok ? QCoreApplication::translate("Orbital", "Kaldırıldı") : error);
         Q_EMIT storeChanged();
         return;
     }
@@ -2841,7 +2865,7 @@ void AppController::applySettings()
     m_settingsDirty = false;
     reloadExtensions();
     switchEngine(engineId());
-    Q_EMIT toast(QStringLiteral("Ayarlar uygulandı"));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "Ayarlar uygulandı"));
 }
 
 // ---------------------------------------------------------------- EdgeAccount
@@ -2879,13 +2903,13 @@ void AppController::accountCancel()
 void AppController::accountSignOut()
 {
     m_account->signOut();
-    Q_EMIT toast(QStringLiteral("EdgeAccount oturumu kapatıldı."));
+    Q_EMIT toast(QCoreApplication::translate("Orbital", "EdgeAccount oturumu kapatıldı."));
 }
 
 QString AppController::appVersion() const
 {
     const QString ver = QCoreApplication::applicationVersion();
-    return ver.isEmpty() ? QStringLiteral("0.5.12") : ver;
+    return ver.isEmpty() ? QStringLiteral(ORBITAL_SURUM) : ver;
 }
 
 void AppController::checkForUpdates(bool silent)
@@ -2894,7 +2918,7 @@ void AppController::checkForUpdates(bool silent)
         return;
 
     m_checkingUpdate = true;
-    m_updateStatus = QStringLiteral("Güncellemeler denetleniyor...");
+    m_updateStatus = QCoreApplication::translate("Orbital", "Güncellemeler denetleniyor...");
     Q_EMIT updateChanged();
 
     auto processPayload = [this, silent](const QJsonObject &obj) -> bool {
@@ -2985,22 +3009,22 @@ void AppController::checkForUpdates(bool silent)
 
             if (!m_updateDownloadUrl.isEmpty()) {
                 m_updateAvailable = true;
-                m_updateStatus = QStringLiteral("Yeni sürüm mevcut: v%1").arg(m_updateVersion);
+                m_updateStatus = QCoreApplication::translate("Orbital", "Yeni sürüm mevcut: v%1").arg(m_updateVersion);
                 Q_EMIT updateChanged();
-                Q_EMIT toast(QStringLiteral("Yeni Orbital sürümü mevcut: v%1").arg(m_updateVersion));
+                Q_EMIT toast(QCoreApplication::translate("Orbital", "Yeni Orbital sürümü mevcut: v%1").arg(m_updateVersion));
             } else {
                 m_updateAvailable = false;
-                m_updateStatus = QStringLiteral("Platformunuz için indirme paketi bulunamadı.");
+                m_updateStatus = QCoreApplication::translate("Orbital", "Platformunuz için indirme paketi bulunamadı.");
                 Q_EMIT updateChanged();
             }
         } else {
             // Strictly prevent downgrade: clear any download URL and mark as current
             m_updateAvailable = false;
             m_updateDownloadUrl.clear();
-            m_updateStatus = QStringLiteral("Orbital güncel (v%1).").arg(current);
+            m_updateStatus = QCoreApplication::translate("Orbital", "Orbital güncel (v%1).").arg(current);
             Q_EMIT updateChanged();
             if (!silent)
-                Q_EMIT toast(QStringLiteral("Orbital en güncel sürümde (v%1).").arg(current));
+                Q_EMIT toast(QCoreApplication::translate("Orbital", "Orbital en güncel sürümde (v%1).").arg(current));
         }
         return true;
     };
@@ -3020,10 +3044,10 @@ void AppController::checkForUpdates(bool silent)
             if (doc.isObject() && processPayload(doc.object()))
                 return;
         }
-        m_updateStatus = QStringLiteral("Güncelleme denetlenemedi.");
+        m_updateStatus = QCoreApplication::translate("Orbital", "Güncelleme denetlenemedi.");
         Q_EMIT updateChanged();
         if (!silent)
-            Q_EMIT toast(QStringLiteral("Güncelleme sunucusuna ulaşılamadı."));
+            Q_EMIT toast(QCoreApplication::translate("Orbital", "Güncelleme sunucusuna ulaşılamadı."));
     });
 }
 
@@ -3035,8 +3059,8 @@ void AppController::applyUpdate()
     m_updating = true;
     m_updateProgress = 0.0;
     const double mb = static_cast<double>(m_updateAssetSize) / (1024.0 * 1024.0);
-    m_updateStatus = mb > 0.0 ? QStringLiteral("İndiriliyor (%1 MB)...").arg(QString::number(mb, 'f', 1))
-                              : QStringLiteral("İndiriliyor...");
+    m_updateStatus = mb > 0.0 ? QCoreApplication::translate("Orbital", "İndiriliyor (%1 MB)...").arg(QString::number(mb, 'f', 1))
+                              : QCoreApplication::translate("Orbital", "İndiriliyor...");
     Q_EMIT updateChanged();
     Q_EMIT updateProgressChanged();
 
@@ -3056,7 +3080,7 @@ void AppController::applyUpdate()
     QFile *file = new QFile(destFile, this);
     if (!file->open(QIODevice::WriteOnly)) {
         m_updating = false;
-        m_updateStatus = QStringLiteral("Dosya yazılamadı: %1").arg(file->errorString());
+        m_updateStatus = QCoreApplication::translate("Orbital", "Dosya yazılamadı: %1").arg(file->errorString());
         Q_EMIT updateChanged();
         Q_EMIT toast(m_updateStatus);
         delete file;
@@ -3072,7 +3096,7 @@ void AppController::applyUpdate()
     connect(reply, &QNetworkReply::downloadProgress, this, [this](qint64 received, qint64 total) {
         if (total > 0) {
             m_updateProgress = static_cast<qreal>(received) / static_cast<qreal>(total);
-            m_updateStatus = QStringLiteral("İndiriliyor: %%%1").arg(qRound(m_updateProgress * 100));
+            m_updateStatus = QCoreApplication::translate("Orbital", "İndiriliyor: %%%1").arg(qRound(m_updateProgress * 100));
             Q_EMIT updateProgressChanged();
             Q_EMIT updateChanged();
         }
@@ -3091,13 +3115,13 @@ void AppController::applyUpdate()
         if (reply->error() != QNetworkReply::NoError) {
             QFile::remove(destFile);
             m_updating = false;
-            m_updateStatus = QStringLiteral("İndirme başarısız: %1").arg(reply->errorString());
+            m_updateStatus = QCoreApplication::translate("Orbital", "İndirme başarısız: %1").arg(reply->errorString());
             Q_EMIT updateChanged();
             Q_EMIT toast(m_updateStatus);
             return;
         }
 
-        m_updateStatus = QStringLiteral("Güncelleme uygulanıyor, yeniden başlatılıyor...");
+        m_updateStatus = QCoreApplication::translate("Orbital", "Güncelleme uygulanıyor, yeniden başlatılıyor...");
         Q_EMIT updateChanged();
 
 #if defined(Q_OS_WIN)
@@ -3120,7 +3144,7 @@ void AppController::applyUpdate()
             return;
         } else {
             m_updating = false;
-            m_updateStatus = QStringLiteral("Güncelleme betiği oluşturulamadı.");
+            m_updateStatus = QCoreApplication::translate("Orbital", "Güncelleme betiği oluşturulamadı.");
             Q_EMIT updateChanged();
             Q_EMIT toast(m_updateStatus);
         }
@@ -3153,7 +3177,7 @@ void AppController::applyUpdate()
             return;
         } else {
             m_updating = false;
-            m_updateStatus = QStringLiteral("Güncelleme betiği oluşturulamadı.");
+            m_updateStatus = QCoreApplication::translate("Orbital", "Güncelleme betiği oluşturulamadı.");
             Q_EMIT updateChanged();
             Q_EMIT toast(m_updateStatus);
         }
@@ -3161,10 +3185,10 @@ void AppController::applyUpdate()
         if (qEnvironmentVariable("ORBITAL_PACKAGE") == QLatin1String("deb")) {
             // Installing a .deb needs root: hand it to the desktop's software installer.
             m_updating = false;
-            m_updateStatus = QStringLiteral("Kurulum penceresi açıldı; kurduktan sonra Orbital'i yeniden başlat.");
+            m_updateStatus = QCoreApplication::translate("Orbital", "Kurulum penceresi açıldı; kurduktan sonra Orbital'i yeniden başlat.");
             Q_EMIT updateChanged();
             if (!QDesktopServices::openUrl(QUrl::fromLocalFile(destFile)))
-                Q_EMIT toast(QStringLiteral("Paket indirildi: %1 — terminalde: sudo apt install %1").arg(destFile));
+                Q_EMIT toast(QCoreApplication::translate("Orbital", "Paket indirildi: %1 — terminalde: sudo apt install %1").arg(destFile));
             return;
         }
         const QString appImagePath = qEnvironmentVariable("APPIMAGE");

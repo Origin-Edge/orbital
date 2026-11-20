@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "tools.h"
 
 #include "config.h"
@@ -39,7 +40,7 @@ static QJsonObject tool(const QString &name, const QString &description, const Q
 static QString truncate(QString s)
 {
     if (s.size() > kMaxOutput)
-        s = s.left(kMaxOutput) + QStringLiteral("\n… (çıktı %1 karakterde kesildi)").arg(kMaxOutput);
+        s = s.left(kMaxOutput) + QCoreApplication::translate("Orbital", "\n… (çıktı %1 karakterde kesildi)").arg(kMaxOutput);
     return s;
 }
 
@@ -262,19 +263,19 @@ void ToolRegistry::runProcess(const QString &program, const QStringList &args, c
     });
     connect(proc, &QProcess::errorOccurred, proc, [proc, done](QProcess::ProcessError err) {
         if (err == QProcess::FailedToStart) {
-            done(QStringLiteral("Komut başlatılamadı: %1").arg(proc->program()), true);
+            done(QCoreApplication::translate("Orbital", "Komut başlatılamadı: %1").arg(proc->program()), true);
             proc->deleteLater();
         }
     });
     connect(proc, &QProcess::finished, proc, [proc, done, timedOut](int code, QProcess::ExitStatus status) {
         QString out = truncate(QString::fromUtf8(proc->readAll()));
         if (*timedOut)
-            out += QStringLiteral("\n(zaman aşımı nedeniyle sonlandırıldı)");
+            out += QCoreApplication::translate("Orbital", "\n(zaman aşımı nedeniyle sonlandırıldı)");
         else if (status == QProcess::CrashExit)
-            out += QStringLiteral("\n(süreç sonlandırıldı)");
+            out += QCoreApplication::translate("Orbital", "\n(süreç sonlandırıldı)");
         else if (code != 0)
-            out += QStringLiteral("\n(çıkış kodu %1)").arg(code);
-        done(out.isEmpty() ? QStringLiteral("(çıktı yok)") : out, *timedOut || code != 0);
+            out += QCoreApplication::translate("Orbital", "\n(çıkış kodu %1)").arg(code);
+        done(out.isEmpty() ? QCoreApplication::translate("Orbital", "(çıktı yok)") : out, *timedOut || code != 0);
         proc->deleteLater();
     });
     proc->start(program, args);
@@ -292,7 +293,7 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
     if (name == QLatin1String("read")) {
         QFile f(resolve(directory, str("path")));
         if (!f.open(QIODevice::ReadOnly))
-            return done(QStringLiteral("Dosya okunamadı: %1").arg(f.errorString()), true);
+            return done(QCoreApplication::translate("Orbital", "Dosya okunamadı: %1").arg(f.errorString()), true);
         const QStringList lines = QString::fromUtf8(f.readAll()).split(QLatin1Char('\n'));
         const int offset = qMax(1, args.value(QStringLiteral("offset")).toInt(1));
         const int limit = qMax(1, args.value(QStringLiteral("limit")).toInt(2000));
@@ -300,13 +301,13 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
         for (int i = offset - 1; i < lines.size() && i < offset - 1 + limit; ++i)
             out += QStringLiteral("%1\t%2\n").arg(i + 1, 5).arg(lines.at(i).left(2000));
         if (offset - 1 + limit < lines.size())
-            out += QStringLiteral("… (%1 satır daha; offset ile devam et)\n").arg(lines.size() - (offset - 1 + limit));
+            out += QCoreApplication::translate("Orbital", "… (%1 satır daha; offset ile devam et)\n").arg(lines.size() - (offset - 1 + limit));
         return done(truncate(out), false);
     }
     if (name == QLatin1String("list")) {
         QDir dir(resolve(directory, str("path")));
         if (!dir.exists())
-            return done(QStringLiteral("Klasör bulunamadı."), true);
+            return done(QCoreApplication::translate("Orbital", "Klasör bulunamadı."), true);
         QStringList out;
         for (const QFileInfo &fi : dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden,
                                                      QDir::DirsFirst | QDir::Name))
@@ -320,7 +321,7 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
                                                              : str("pattern"));
         const QRegularExpression contentRx(str("pattern"));
         if (isGrep && !contentRx.isValid())
-            return done(QStringLiteral("Geçersiz regex: %1").arg(contentRx.errorString()), true);
+            return done(QCoreApplication::translate("Orbital", "Geçersiz regex: %1").arg(contentRx.errorString()), true);
         QStringList out;
         QDirIterator it(root, QDir::Files | QDir::Hidden, QDirIterator::Subdirectories);
         while (it.hasNext() && out.size() < 300) {
@@ -349,13 +350,13 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
             }
         }
         if (out.isEmpty())
-            return done(QStringLiteral("Eşleşme yok."), false);
+            return done(QCoreApplication::translate("Orbital", "Eşleşme yok."), false);
         return done(truncate(out.join(QLatin1Char('\n'))), false);
     }
     if (name == QLatin1String("skill")) {
         const Skill *s = m_skills->find(str("name"));
         if (!s || !s->enabled)
-            return done(QStringLiteral("Böyle bir skill yok: %1").arg(str("name")), true);
+            return done(QCoreApplication::translate("Orbital", "Böyle bir skill yok: %1").arg(str("name")), true);
         return done(QStringLiteral("<skill name=\"%1\" dir=\"%2\">\n%3\n</skill>").arg(s->name, s->dir, s->body), false);
     }
     if (name == QLatin1String("write")) {
@@ -363,33 +364,33 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
         QDir().mkpath(QFileInfo(path).absolutePath());
         QFile f(path);
         if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate))
-            return done(QStringLiteral("Yazılamadı: %1").arg(f.errorString()), true);
+            return done(QCoreApplication::translate("Orbital", "Yazılamadı: %1").arg(f.errorString()), true);
         f.write(str("content").toUtf8());
         f.close(); // flush before the next tool in this turn reads the file
-        return done(QStringLiteral("Yazıldı: %1 (%2 bayt)").arg(str("path")).arg(str("content").toUtf8().size()), false);
+        return done(QCoreApplication::translate("Orbital", "Yazıldı: %1 (%2 bayt)").arg(str("path")).arg(str("content").toUtf8().size()), false);
     }
     if (name == QLatin1String("edit")) {
         const QString path = resolve(directory, str("path"));
         QFile f(path);
         if (!f.open(QIODevice::ReadOnly))
-            return done(QStringLiteral("Dosya okunamadı: %1").arg(f.errorString()), true);
+            return done(QCoreApplication::translate("Orbital", "Dosya okunamadı: %1").arg(f.errorString()), true);
         QString text = QString::fromUtf8(f.readAll());
         f.close();
         const QString oldS = str("oldString");
         const int count = text.count(oldS);
         if (oldS.isEmpty() || count == 0)
-            return done(QStringLiteral("oldString dosyada bulunamadı."), true);
+            return done(QCoreApplication::translate("Orbital", "oldString dosyada bulunamadı."), true);
         if (count > 1 && !args.value(QStringLiteral("replaceAll")).toBool())
-            return done(QStringLiteral("oldString %1 kez geçiyor; daha fazla bağlam ver veya replaceAll kullan.").arg(count), true);
+            return done(QCoreApplication::translate("Orbital", "oldString %1 kez geçiyor; daha fazla bağlam ver veya replaceAll kullan.").arg(count), true);
         if (args.value(QStringLiteral("replaceAll")).toBool())
             text.replace(oldS, str("newString"));
         else
             text.replace(text.indexOf(oldS), oldS.size(), str("newString"));
         if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate))
-            return done(QStringLiteral("Yazılamadı: %1").arg(f.errorString()), true);
+            return done(QCoreApplication::translate("Orbital", "Yazılamadı: %1").arg(f.errorString()), true);
         f.write(text.toUtf8());
         f.close();
-        return done(QStringLiteral("Düzenlendi: %1 (%2 değişiklik)").arg(str("path")).arg(args.value(QStringLiteral("replaceAll")).toBool() ? count : 1), false);
+        return done(QCoreApplication::translate("Orbital", "Düzenlendi: %1 (%2 değişiklik)").arg(str("path")).arg(args.value(QStringLiteral("replaceAll")).toBool() ? count : 1), false);
     }
     if (name == QLatin1String("bash")) {
         const int timeout = qBound(1, args.value(QStringLiteral("timeout")).toInt(120), 1800) * 1000;
@@ -412,5 +413,5 @@ void ToolRegistry::execute(const QString &name, const QJsonObject &args, const Q
                 return c->callTool(toolName, args, done);
         }
     }
-    done(QStringLiteral("Bilinmeyen araç: %1").arg(name), true);
+    done(QCoreApplication::translate("Orbital", "Bilinmeyen araç: %1").arg(name), true);
 }

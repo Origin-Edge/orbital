@@ -2,6 +2,7 @@
 <RCC version="1.0">
 <qresource prefix="/">
     <file alias="theme/orbital.svg">orbital.svg</file>
+    <file alias="i18n/orbital_en.qm">../i18n/orbital_en.qm</file>
     <file>icons.json</file>
     <file>qml/qmldir</file>
     <file>qml/Main.qml</file>

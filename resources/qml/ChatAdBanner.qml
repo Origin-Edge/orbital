@@ -20,27 +20,27 @@ Rectangle {
     readonly property var campaigns: [
         {
             "id": "blufy",
-            "name": "Blufy",
-            "tag": "Ücretsiz MP3/4 İndirici",
-            "desc": "YouTube ve medyalar için hızlı, reklamsız indirme aracı",
+            "name": qsTr("Blufy"),
+            "tag": qsTr("Ücretsiz MP3/4 İndirici"),
+            "desc": qsTr("YouTube ve medyalar için hızlı, reklamsız indirme aracı"),
             "domain": "blufy.oedge.xyz",
             "url": "https://blufy.oedge.xyz",
             "icon": "download"
         },
         {
             "id": "convert",
-            "name": "EdgeConvert",
-            "tag": "Dosya Dönüştürücü",
-            "desc": "Video, ses ve belgeleri anında farklı formatlara çevirin",
+            "name": qsTr("EdgeConvert"),
+            "tag": qsTr("Dosya Dönüştürücü"),
+            "desc": qsTr("Video, ses ve belgeleri anında farklı formatlara çevirin"),
             "domain": "convert.oedge.xyz",
             "url": "https://convert.oedge.xyz",
             "icon": "refresh"
         },
         {
             "id": "hizmet",
-            "name": "Origin Edge Hizmet",
-            "tag": "Web & Tasarım Çözümleri",
-            "desc": "Güvenilir web barındırma, sunucu ve modern web tasarım hizmeti",
+            "name": qsTr("Origin Edge Hizmet"),
+            "tag": qsTr("Web & Tasarım Çözümleri"),
+            "desc": qsTr("Güvenilir web barındırma, sunucu ve modern web tasarım hizmeti"),
             "domain": "hizmet.oedge.xyz",
             "url": "https://hizmet.oedge.xyz",
             "icon": "globe"
@@ -95,7 +95,7 @@ Rectangle {
                     Text {
                         id: sponsorTag
                         anchors.centerIn: parent
-                        text: "SPONSOR"
+                        text: qsTr("SPONSOR")
                         font.family: Theme.font
                         font.pixelSize: 9
                         font.weight: Font.Bold
@@ -134,7 +134,7 @@ Rectangle {
         Row {
             spacing: 4
             Text {
-                text: "Keşfet"
+                text: qsTr("Keşfet")
                 font.family: Theme.font
                 font.pixelSize: Theme.fontSmall
                 font.weight: Font.Medium

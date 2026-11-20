@@ -77,7 +77,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 Layout.leftMargin: 4
-                text: "Oturum"
+                text: qsTr("Oturum")
                 font.family: Theme.font
                 font.pixelSize: Theme.fontUi + 1
                 font.weight: Font.DemiBold
@@ -86,36 +86,36 @@ Rectangle {
             IconButton { iconName: "x"; iconSize: 15; tip: "Paneli kapat"; onClicked: root.close() }
         }
 
-        Heading { text: App.isNoFolder ? "Mod" : "Proje" }
+        Heading { text: App.isNoFolder ? qsTr("Mod") : qsTr("Proje") }
         InfoRow {
             iconName: App.isNoFolder ? "chat" : "folder"
-            text: App.isNoFolder ? "Sohbet (klasörsüz)" : App.projectName
-            detail: App.isNoFolder ? "Dosyalara dokunmadan sohbet" : App.projectPath
+            text: App.isNoFolder ? qsTr("Sohbet (klasörsüz)") : App.projectName
+            detail: App.isNoFolder ? qsTr("Dosyalara dokunmadan sohbet") : App.projectPath
             clickable: !App.isNoFolder
             onClicked: App.openPath(App.projectPath)
         }
 
-        Heading { text: "Motor ve model" }
+        Heading { text: qsTr("Motor ve model") }
         InfoRow {
             iconName: "cpu"
-            text: App.isNoFolder ? "ORBITAL Web" : App.engineId === "opencode" ? "ORBITAL" : "Orbital Core"
-            detail: !App.engineReady ? "Hazırlanıyor…" : App.isNoFolder ? "yz.oedge.xyz üzerinden" : "Bu bilgisayarda"
+            text: App.isNoFolder ? qsTr("ORBITAL Web") : App.engineId === "opencode" ? qsTr("ORBITAL") : qsTr("Orbital Core")
+            detail: !App.engineReady ? qsTr("Hazırlanıyor…") : App.isNoFolder ? qsTr("yz.oedge.xyz üzerinden") : qsTr("Bu bilgisayarda")
             clickable: true
             onClicked: root.openSettings("general")
         }
         InfoRow {
             iconName: App.isCurrentModelLocked ? "lock" : "sparkle"
             text: App.modelLabel
-            detail: App.isCurrentModelLocked ? "Limit doldu, kendiliğinden açılacak" : App.modelRef
+            detail: App.isCurrentModelLocked ? qsTr("Limit doldu, kendiliğinden açılacak") : App.modelRef
         }
 
-        Heading { text: "Kullanım" }
+        Heading { text: qsTr("Kullanım") }
         InfoRow {
             iconName: "clock"
-            text: App.usage.length ? App.usage : "Bu sohbette henüz istek yok"
+            text: App.usage.length ? App.usage : qsTr("Bu sohbette henüz istek yok")
         }
 
-        Heading { visible: App.attachedSkills.length > 0; text: "İliştirilen skill'ler" }
+        Heading { visible: App.attachedSkills.length > 0; text: qsTr("İliştirilen skill'ler") }
         Repeater {
             model: App.attachedSkills
             delegate: InfoRow {
@@ -125,11 +125,11 @@ Rectangle {
             }
         }
 
-        Heading { text: "Hesap" }
+        Heading { text: qsTr("Hesap") }
         InfoRow {
             iconName: "user"
-            text: App.accountSignedIn ? (App.accountName || App.accountEmail) : "Giriş yapılmadı"
-            detail: App.accountSignedIn ? App.accountEmail : "EdgeAccount ile giriş yapılabilir"
+            text: App.accountSignedIn ? (App.accountName || App.accountEmail) : qsTr("Giriş yapılmadı")
+            detail: App.accountSignedIn ? App.accountEmail : qsTr("EdgeAccount ile giriş yapılabilir")
             clickable: !App.accountSignedIn && !App.accountBusy
             onClicked: App.accountSignIn()
         }
@@ -139,7 +139,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             Layout.leftMargin: 4
-            text: "Orbital v" + App.appVersion
+            text: qsTr("Orbital v") + App.appVersion
             font.family: Theme.font
             font.pixelSize: Theme.fontCaption
             color: Theme.textFaint

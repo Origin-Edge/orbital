@@ -8,7 +8,7 @@ Popup {
     id: dialog
     property string heading
     property string message
-    property string confirmText: "Onayla"
+    property string confirmText: qsTr("Onayla")
     property bool destructive: true
     signal confirmed()
 
@@ -47,7 +47,7 @@ Popup {
             Layout.topMargin: 14
             Layout.alignment: Qt.AlignRight
             spacing: 8
-            OButton { text: "Vazgeç"; variant: "ghost"; onClicked: dialog.close() }
+            OButton { text: qsTr("Vazgeç"); variant: "ghost"; onClicked: dialog.close() }
             OButton {
                 text: dialog.confirmText
                 variant: dialog.destructive ? "danger" : "primary"

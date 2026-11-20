@@ -66,7 +66,7 @@ AbstractButton {
                 Layout.fillWidth: true
                 implicitHeight: 36
                 iconName: "search"
-                placeholderText: "Model ara"
+                placeholderText: qsTr("Model ara")
             }
             ListView {
                 id: list
@@ -103,7 +103,7 @@ AbstractButton {
                         App.setModel(modelData.ref)
                         popup.close()
                         if (locked)
-                            App.toast("Bu modelin limiti doldu (🔒), " + modelData.lockText + "'de kendiliğinden açılır. Hemen açmak için /kilit-ac yazabilirsiniz.")
+                            App.toast(qsTr("Bu modelin limiti doldu (🔒), %1'de kendiliğinden açılır. Hemen açmak için /kilit-ac yazabilirsiniz.").arg(modelData.lockText))
                     }
                     background: Rectangle { radius: Theme.radiusSm; color: item.hovered ? Theme.hover : "transparent" }
                     contentItem: RowLayout {
@@ -130,7 +130,7 @@ AbstractButton {
                                 spacing: 3
                                 Icon { name: "lock"; size: 11; color: Theme.danger; anchors.verticalCenter: parent.verticalCenter }
                                 Text {
-                                    text: item.modelData.lockText ? "Limit · " + item.modelData.lockText : "Limit Doldu"
+                                    text: item.modelData.lockText ? qsTr("Limit · ") + item.modelData.lockText : qsTr("Limit Doldu")
                                     font.family: Theme.font
                                     font.pixelSize: Theme.fontSmall - 1
                                     font.weight: Font.Medium
@@ -146,7 +146,7 @@ AbstractButton {
                 Text {
                     anchors.centerIn: parent
                     visible: list.count === 0
-                    text: App.engineReady ? "Model bulunamadı" : "Hazırlanıyor…"
+                    text: App.engineReady ? qsTr("Model bulunamadı") : qsTr("Hazırlanıyor…")
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSmall
                     color: Theme.textFaint

@@ -36,9 +36,9 @@ Popup {
     background: Rectangle { radius: Theme.radiusLg; color: Theme.bg; border.width: 1; border.color: Theme.border }
 
     FolderDialog { id: projectDialog; parentWindow: dialog.parent ? dialog.parent.Window.window : null; onAccepted: App.setProject(selectedFolder) }
-    FolderDialog { id: importSkillDialog; parentWindow: dialog.parent ? dialog.parent.Window.window : null; title: "SKILL.md içeren klasörü seç"
+    FolderDialog { id: importSkillDialog; parentWindow: dialog.parent ? dialog.parent.Window.window : null; title: qsTr("SKILL.md içeren klasörü seç")
         onAccepted: { const e = App.importSkill(selectedFolder); if (e) errorText.show(e); dialog.refresh() } }
-    FolderDialog { id: installPluginDialog; parentWindow: dialog.parent ? dialog.parent.Window.window : null; title: "plugin.json içeren klasörü seç"
+    FolderDialog { id: installPluginDialog; parentWindow: dialog.parent ? dialog.parent.Window.window : null; title: qsTr("plugin.json içeren klasörü seç")
         onAccepted: { const e = App.installPlugin(selectedFolder); if (e) errorText.show(e); dialog.refresh() } }
 
     // ---------------------------------------------------------- building blocks
@@ -119,14 +119,14 @@ Popup {
                 anchors.margins: 12
                 anchors.topMargin: 18
                 spacing: 2
-                Text { text: "Ayarlar"; Layout.leftMargin: 10; Layout.bottomMargin: 12; font.family: Theme.font; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; color: Theme.text }
+                Text { text: qsTr("Ayarlar"); Layout.leftMargin: 10; Layout.bottomMargin: 12; font.family: Theme.font; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; color: Theme.text }
                 Repeater {
                     model: [
-                        { id: "general", label: "Genel", icon: "settings" },
-                        { id: "providers", label: "Sağlayıcılar", icon: "server" },
-                        { id: "permissions", label: "İzinler", icon: "shield" },
-                        { id: "skills", label: "Skill'ler", icon: "sparkle" },
-                        { id: "plugins", label: "Eklentiler", icon: "blocks" }
+                        { id: "general", label: qsTr("Genel"), icon: "settings" },
+                        { id: "providers", label: qsTr("Sağlayıcılar"), icon: "server" },
+                        { id: "permissions", label: qsTr("İzinler"), icon: "shield" },
+                        { id: "skills", label: qsTr("Skill'ler"), icon: "sparkle" },
+                        { id: "plugins", label: qsTr("Eklentiler"), icon: "blocks" }
                     ]
                     delegate: AbstractButton {
                         id: navItem
@@ -146,7 +146,7 @@ Popup {
                     }
                 }
                 Item { Layout.fillHeight: true }
-                Text { text: "Orbital " + App.appVersion; Layout.leftMargin: 10; font.family: Theme.font; font.pixelSize: Theme.fontCaption; color: Theme.textFaint }
+                Text { text: qsTr("Orbital ") + App.appVersion; Layout.leftMargin: 10; font.family: Theme.font; font.pixelSize: Theme.fontCaption; color: Theme.textFaint }
             }
         }
 
@@ -209,68 +209,78 @@ Popup {
                         visible: dialog.page === "general"
                         Layout.fillWidth: true
                         spacing: 10
-                        PageTitle { title: "Genel" }
-                        SectionLabel { text: "HESAP" }
+                        PageTitle { title: qsTr("Genel") }
+                        SectionLabel { text: qsTr("HESAP") }
                         Card {
                             SettingRow {
                                 title: App.accountSignedIn ? (App.accountName.length > 0 ? App.accountName : App.accountEmail)
-                                                           : "EdgeAccount ile giriş yap"
+                                                           : qsTr("EdgeAccount ile giriş yap")
                                 subtitle: App.accountSignedIn
                                           ? App.accountEmail
-                                          : App.accountBusy ? "Tarayıcıda girişi tamamla…"
-                                                            : "İsteğe bağlı Origin Edge hesabı."
+                                          : App.accountBusy ? qsTr("Tarayıcıda girişi tamamla…")
+                                                            : qsTr("İsteğe bağlı Origin Edge hesabı.")
                                 divider: false
                                 OButton {
                                     visible: !App.accountSignedIn && !App.accountBusy
                                     variant: "primary"
-                                    text: "Giriş yap"
+                                    text: qsTr("Giriş yap")
                                     iconName: "external"
                                     onClicked: App.accountSignIn()
                                 }
-                                OButton { visible: App.accountBusy; text: "Vazgeç"; onClicked: App.accountCancel() }
-                                OButton { visible: App.accountSignedIn; text: "Çıkış yap"; onClicked: App.accountSignOut() }
+                                OButton { visible: App.accountBusy; text: qsTr("Vazgeç"); onClicked: App.accountCancel() }
+                                OButton { visible: App.accountSignedIn; text: qsTr("Çıkış yap"); onClicked: App.accountSignOut() }
                             }
                         }
-                        SectionLabel { text: "MOTOR" }
+                        SectionLabel { text: qsTr("MOTOR") }
                         Card {
                             SettingRow {
-                                title: "Kod modu motoru"
+                                title: qsTr("Kod modu motoru")
                                 subtitle: App.codeEngine === "opencode"
-                                          ? "ORBITAL: ücretsiz ORBITAL modelleriyle, bu bilgisayarda çalışan ajan motoru."
-                                          : "Orbital Core: Orbital'in kendi motoru; Ayarlar → Sağlayıcılar'dan eklediğin modellerle çalışır. (Sohbet modu her zaman ORBITAL Web'i kullanır.)"
+                                          ? qsTr("ORBITAL: ücretsiz ORBITAL modelleriyle, bu bilgisayarda çalışan ajan motoru.")
+                                          : qsTr("Orbital Core: Orbital'in kendi motoru; Ayarlar → Sağlayıcılar'dan eklediğin modellerle çalışır. (Sohbet modu her zaman ORBITAL Web'i kullanır.)")
                                 divider: false
                                 Segmented {
-                                    model: [{ value: "opencode", label: "ORBITAL" }, { value: "native", label: "Orbital Core" }]
+                                    model: [{ value: "opencode", label: qsTr("ORBITAL") }, { value: "native", label: qsTr("Orbital Core") }]
                                     value: App.codeEngine
                                     onPicked: v => { if (v !== App.codeEngine) App.chooseEngine(v) }
                                 }
                             }
                         }
-                        SectionLabel { text: "GÖRÜNÜM" }
+                        SectionLabel { text: qsTr("GÖRÜNÜM") }
                         Card {
                             SettingRow {
-                                title: "Tema"
-                                subtitle: "Sistem ayarını izle ya da açık/koyu temayı sabitle."
-                                divider: false
+                                title: qsTr("Tema")
+                                subtitle: qsTr("Sistem ayarını izle ya da açık/koyu temayı sabitle.")
+                                divider: true
                                 Segmented {
-                                    model: [{ value: "system", label: "Sistem", icon: "monitor" }, { value: "light", label: "Açık", icon: "sun" }, { value: "dark", label: "Koyu", icon: "moon" }]
+                                    model: [{ value: "system", label: qsTr("Sistem"), icon: "monitor" }, { value: "light", label: qsTr("Açık"), icon: "sun" }, { value: "dark", label: qsTr("Koyu"), icon: "moon" }]
                                     value: App.themeMode
                                     onPicked: v => App.themeMode = v
                                 }
                             }
+                            SettingRow {
+                                title: qsTr("Dil")
+                                subtitle: qsTr("Arayüz dili. ORBITAL yanıtlarını da bu dilde verir.")
+                                divider: false
+                                Segmented {
+                                    model: [{ value: "tr", label: "Türkçe" }, { value: "en", label: "English" }]
+                                    value: App.language
+                                    onPicked: v => App.language = v
+                                }
+                            }
                         }
-                        SectionLabel { text: "PROJE VE DOSYALAR" }
+                        SectionLabel { text: qsTr("PROJE VE DOSYALAR") }
                         Card {
                             SettingRow {
                                 title: App.projectName
                                 subtitle: App.projectPath
-                                OButton { text: "Değiştir"; iconName: "folder"; onClicked: projectDialog.open() }
+                                OButton { text: qsTr("Değiştir"); iconName: "folder"; onClicked: projectDialog.open() }
                             }
                             Repeater {
                                 model: [
-                                    { key: "config", label: "Yapılandırma dosyası" },
-                                    { key: "data", label: "Orbital veri klasörü" },
-                                    { key: "engine", label: "ORBITAL motor klasörü" }
+                                    { key: "config", label: qsTr("Yapılandırma dosyası") },
+                                    { key: "data", label: qsTr("Orbital veri klasörü") },
+                                    { key: "engine", label: qsTr("ORBITAL motor klasörü") }
                                 ]
                                 delegate: SettingRow {
                                     required property var modelData
@@ -282,17 +292,17 @@ Popup {
                                 }
                             }
                         }
-                        SectionLabel { text: "GÜNCELLEME" }
+                        SectionLabel { text: qsTr("GÜNCELLEME") }
                         Card {
                             SettingRow {
-                                title: "Orbital v" + App.appVersion
-                                subtitle: App.updateStatus.length > 0 ? App.updateStatus : (App.updateAvailable ? ("Yeni sürüm mevcut: v" + App.updateVersion) : "Orbital güncel.")
+                                title: qsTr("Orbital v") + App.appVersion
+                                subtitle: App.updateStatus.length > 0 ? App.updateStatus : (App.updateAvailable ? (qsTr("Yeni sürüm mevcut: v") + App.updateVersion) : qsTr("Orbital güncel."))
                                 divider: App.updating
                                 Row {
                                     spacing: 8
                                     OButton {
                                         visible: !App.updating && !App.updateAvailable
-                                        text: App.checkingUpdate ? "Denetleniyor..." : "Güncellemeleri Denetle"
+                                        text: App.checkingUpdate ? qsTr("Denetleniyor...") : qsTr("Güncellemeleri Denetle")
                                         iconName: "refresh"
                                         enabled: !App.checkingUpdate
                                         onClicked: App.checkForUpdates(false)
@@ -300,7 +310,7 @@ Popup {
                                     OButton {
                                         visible: !App.updating && App.updateAvailable
                                         variant: "primary"
-                                        text: "Şimdi Güncelle (v" + App.updateVersion + ")"
+                                        text: qsTr("Şimdi Güncelle (v") + App.updateVersion + ")"
                                         iconName: "sparkle"
                                         onClicked: App.applyUpdate()
                                     }
@@ -343,8 +353,8 @@ Popup {
                         Layout.fillWidth: true
                         spacing: 10
                         PageTitle {
-                            title: "Sağlayıcılar"
-                            subtitle: "API anahtarını ekleyerek kendi hesabındaki modelleri bağla. Bağlanan modeller model menüsünde görünür."
+                            title: qsTr("Sağlayıcılar")
+                            subtitle: qsTr("API anahtarını ekleyerek kendi hesabındaki modelleri bağla. Bağlanan modeller model menüsünde görünür.")
                         }
                         GridLayout {
                             Layout.fillWidth: true
@@ -409,7 +419,7 @@ Popup {
                                                 spacing: 4
                                                 Icon { visible: tile.modelData.connected; name: "check"; size: 13; color: Theme.success; anchors.verticalCenter: parent.verticalCenter }
                                                 Text {
-                                                    text: tile.modelData.connected ? "Bağlı" : "Bağla"
+                                                    text: tile.modelData.connected ? qsTr("Bağlı") : qsTr("Bağla")
                                                     font.family: Theme.font; font.pixelSize: Theme.fontCaption + 1; font.weight: Font.Medium
                                                     color: tile.modelData.connected ? Theme.success : Theme.text
                                                     anchors.verticalCenter: parent.verticalCenter
@@ -422,7 +432,7 @@ Popup {
                         }
                         OButton {
                             Layout.topMargin: 6
-                            text: "Özel sağlayıcı ekle (OpenAI uyumlu)"
+                            text: qsTr("Özel sağlayıcı ekle (OpenAI uyumlu)")
                             iconName: "plus"
                             variant: "ghost"
                             onClicked: customDialog.open()
@@ -434,19 +444,19 @@ Popup {
                         visible: dialog.page === "permissions"
                         Layout.fillWidth: true
                         spacing: 10
-                        PageTitle { title: "İzinler"; subtitle: "Orbital'in her araç için ne yapacağını seç. \"Sor\" seçiliyse çalıştırmadan önce onayın istenir." }
+                        PageTitle { title: qsTr("İzinler"); subtitle: qsTr("Orbital'in her araç için ne yapacağını seç. \"Sor\" seçiliyse çalıştırmadan önce onayın istenir.") }
                         Card {
                             Repeater {
                                 model: [
-                                    { tool: "read", label: "Dosya okuma", icon: "file" },
-                                    { tool: "list", label: "Klasör listeleme", icon: "folder" },
-                                    { tool: "glob", label: "Dosya arama", icon: "search" },
-                                    { tool: "grep", label: "İçerik arama", icon: "search" },
-                                    { tool: "skill", label: "Skill yükleme", icon: "sparkle" },
-                                    { tool: "write", label: "Dosya yazma", icon: "pencil" },
-                                    { tool: "edit", label: "Dosya düzenleme", icon: "pencil" },
-                                    { tool: "bash", label: "Komut çalıştırma", icon: "terminal" },
-                                    { tool: "*", label: "Diğer araçlar (eklenti ve MCP)", icon: "blocks" }
+                                    { tool: "read", label: qsTr("Dosya okuma"), icon: "file" },
+                                    { tool: "list", label: qsTr("Klasör listeleme"), icon: "folder" },
+                                    { tool: "glob", label: qsTr("Dosya arama"), icon: "search" },
+                                    { tool: "grep", label: qsTr("İçerik arama"), icon: "search" },
+                                    { tool: "skill", label: qsTr("Skill yükleme"), icon: "sparkle" },
+                                    { tool: "write", label: qsTr("Dosya yazma"), icon: "pencil" },
+                                    { tool: "edit", label: qsTr("Dosya düzenleme"), icon: "pencil" },
+                                    { tool: "bash", label: qsTr("Komut çalıştırma"), icon: "terminal" },
+                                    { tool: "*", label: qsTr("Diğer araçlar (eklenti ve MCP)"), icon: "blocks" }
                                 ]
                                 delegate: SettingRow {
                                     required property var modelData
@@ -455,7 +465,7 @@ Popup {
                                     subtitle: modelData.tool === "*" ? "" : modelData.tool
                                     divider: index < 8
                                     Segmented {
-                                        model: [{ value: "allow", label: "İzin ver" }, { value: "ask", label: "Sor" }, { value: "deny", label: "Reddet" }]
+                                        model: [{ value: "allow", label: qsTr("İzin ver") }, { value: "ask", label: qsTr("Sor") }, { value: "deny", label: qsTr("Reddet") }]
                                         value: dialog.revision >= 0 ? (App.permissionMap()[modelData.tool] || "ask") : "ask"
                                         onPicked: v => { App.setPermission(modelData.tool, v); dialog.refresh() }
                                     }
@@ -471,13 +481,13 @@ Popup {
                         spacing: 10
                         RowLayout {
                             Layout.fillWidth: true
-                            PageTitle { title: "Skill'ler"; subtitle: "Modelin belirli işleri nasıl yapacağını anlatan talimat paketleri. Etkin skill'leri model gerektiğinde kendisi yükler; sohbette /skill-adı ya da + menüsüyle mesaja iliştirebilirsin." }
+                            PageTitle { title: qsTr("Skill'ler"); subtitle: qsTr("Modelin belirli işleri nasıl yapacağını anlatan talimat paketleri. Etkin skill'leri model gerektiğinde kendisi yükler; sohbette /skill-adı ya da + menüsüyle mesaja iliştirebilirsin.") }
                             Row {
                                 Layout.alignment: Qt.AlignTop
                                 spacing: 6
-                                OButton { text: "GitHub'dan yükle"; iconName: "download"; variant: "ghost"; onClicked: githubSkillDialog.openDialog() }
-                                OButton { text: "İçe aktar"; variant: "ghost"; onClicked: importSkillDialog.open() }
-                                OButton { text: "Yeni skill"; iconName: "plus"; variant: "primary"; onClicked: skillEditor.edit(null) }
+                                OButton { text: qsTr("GitHub'dan yükle"); iconName: "download"; variant: "ghost"; onClicked: githubSkillDialog.openDialog() }
+                                OButton { text: qsTr("İçe aktar"); variant: "ghost"; onClicked: importSkillDialog.open() }
+                                OButton { text: qsTr("Yeni skill"); iconName: "plus"; variant: "primary"; onClicked: skillEditor.edit(null) }
                             }
                         }
                         Card {
@@ -495,7 +505,7 @@ Popup {
                                 }
                             }
                         }
-                        OButton { text: "Skill klasörünü aç"; iconName: "external"; variant: "ghost"; onClicked: App.openPath(App.paths().skills) }
+                        OButton { text: qsTr("Skill klasörünü aç"); iconName: "external"; variant: "ghost"; onClicked: App.openPath(App.paths().skills) }
                     }
 
                     // ----------------------------------------------------- Plugins
@@ -505,12 +515,12 @@ Popup {
                         spacing: 10
                         RowLayout {
                             Layout.fillWidth: true
-                            PageTitle { title: "Eklentiler"; subtitle: "Slash komutları, MCP araç sunucuları, betik araçları, paketlenmiş skill'ler, talimatlar, eylemler ve prompt hook'ları ekler. Her eklenti plugin.json içeren bir klasördür." }
+                            PageTitle { title: qsTr("Eklentiler"); subtitle: qsTr("Slash komutları, MCP araç sunucuları, betik araçları, paketlenmiş skill'ler, talimatlar, eylemler ve prompt hook'ları ekler. Her eklenti plugin.json içeren bir klasördür.") }
                             Row {
                                 Layout.alignment: Qt.AlignTop
                                 spacing: 6
-                                OButton { text: "Klasörden kur"; variant: "ghost"; onClicked: installPluginDialog.open() }
-                                OButton { text: "Yeni eklenti"; iconName: "plus"; variant: "primary"; onClicked: newPlugin.open() }
+                                OButton { text: qsTr("Klasörden kur"); variant: "ghost"; onClicked: installPluginDialog.open() }
+                                OButton { text: qsTr("Yeni eklenti"); iconName: "plus"; variant: "primary"; onClicked: newPlugin.open() }
                             }
                         }
                         Repeater {
@@ -537,7 +547,7 @@ Popup {
                                             spacing: 2
                                             Layout.fillWidth: true
                                             Text {
-                                                text: plcard.modelData.name + (plcard.modelData.version ? "  <font color='" + Theme.textFaint + "'>v" + plcard.modelData.version + "</font>" : "")
+                                                text: plcard.modelData.name + (plcard.modelData.version ? qsTr("  <font color='") + Theme.textFaint + "'>v" + plcard.modelData.version + "</font>" : "")
                                                 textFormat: Text.StyledText
                                                 font.family: Theme.font; font.pixelSize: Theme.fontUi; font.weight: Font.Medium; color: Theme.text
                                             }
@@ -563,7 +573,7 @@ Popup {
                                     spacing: 10
                                     Text {
                                         visible: plcard.modelData.summary.length > 0
-                                        text: "Katkılar: " + plcard.modelData.summary
+                                        text: qsTr("Katkılar: ") + plcard.modelData.summary
                                         font.family: Theme.font; font.pixelSize: Theme.fontSmall; color: Theme.textMuted
                                     }
                                     Text {
@@ -573,12 +583,12 @@ Popup {
                                     }
                                     RowLayout {
                                         spacing: 6
-                                        OButton { text: "Klasörü aç"; iconName: "folder"; variant: "ghost"; onClicked: App.openPath(plcard.modelData.dir) }
+                                        OButton { text: qsTr("Klasörü aç"); iconName: "folder"; variant: "ghost"; onClicked: App.openPath(plcard.modelData.dir) }
                                         OButton { text: "plugin.json"; iconName: "pencil"; variant: "ghost"; onClicked: App.openPath(plcard.modelData.dir + "/plugin.json") }
                                         Item { Layout.fillWidth: true }
                                         OButton {
-                                            text: "Kaldır"; iconName: "trash"; variant: "danger"
-                                            onClicked: { removePluginConfirm.targetId = plcard.modelData.id; removePluginConfirm.message = "“" + plcard.modelData.name + "” ve klasörü silinecek."; removePluginConfirm.open() }
+                                            text: qsTr("Kaldır"); iconName: "trash"; variant: "danger"
+                                            onClicked: { removePluginConfirm.targetId = plcard.modelData.id; removePluginConfirm.message = "“" + plcard.modelData.name + qsTr("” ve klasörü silinecek."); removePluginConfirm.open() }
                                         }
                                     }
                                 }
@@ -597,7 +607,7 @@ Popup {
                     skill = s
                     nameField.text = s ? s.name : ""
                     descField.text = s ? s.description : ""
-                    bodyArea.text = s ? s.body : "# Talimatlar\n\n1. "
+                    bodyArea.text = s ? s.body : qsTr("# Talimatlar\n\n1. ")
                     visible = true
                     nameField.forceActiveFocus()
                 }
@@ -611,13 +621,13 @@ Popup {
                     spacing: 8
                     IconButton { iconName: "chevron-left"; tip: "Geri"; onClicked: skillEditor.visible = false }
                     Text {
-                        text: skillEditor.skill ? "Skill'i düzenle" : "Yeni skill"
+                        text: skillEditor.skill ? qsTr("Skill'i düzenle") : qsTr("Yeni skill")
                         Layout.fillWidth: true
                         font.family: Theme.font; font.pixelSize: 22; font.weight: Font.DemiBold; color: Theme.text
                     }
                 }
-                OTextField { id: nameField; Layout.fillWidth: true; placeholderText: "Ad (ör. kod-inceleme)" }
-                OTextField { id: descField; Layout.fillWidth: true; placeholderText: "Açıklama — model bu skill'i ne zaman kullanmalı?" }
+                OTextField { id: nameField; Layout.fillWidth: true; placeholderText: qsTr("Ad (ör. kod-inceleme)") }
+                OTextField { id: descField; Layout.fillWidth: true; placeholderText: qsTr("Açıklama — model bu skill'i ne zaman kullanmalı?") }
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -637,7 +647,7 @@ Popup {
                             selectionColor: Theme.accentSoft
                             padding: 14
                             background: null
-                            placeholderText: "Markdown talimatlar"
+                            placeholderText: qsTr("Markdown talimatlar")
                             placeholderTextColor: Theme.textFaint
                         }
                     }
@@ -646,7 +656,7 @@ Popup {
                     spacing: 8
                     OButton {
                         visible: skillEditor.skill !== null
-                        text: "Sil"; iconName: "trash"; variant: "danger"
+                        text: qsTr("Sil"); iconName: "trash"; variant: "danger"
                         onClicked: {
                             const e = App.deleteSkill(skillEditor.skill.name)
                             if (e) { errorText.show(e); return }
@@ -655,9 +665,9 @@ Popup {
                         }
                     }
                     Item { Layout.fillWidth: true }
-                    OButton { text: "Vazgeç"; variant: "ghost"; onClicked: skillEditor.visible = false }
+                    OButton { text: qsTr("Vazgeç"); variant: "ghost"; onClicked: skillEditor.visible = false }
                     OButton {
-                        text: "Kaydet"; variant: "primary"
+                        text: qsTr("Kaydet"); variant: "primary"
                         onClicked: {
                             const e = App.saveSkill(skillEditor.skill ? skillEditor.skill.name : "", nameField.text, descField.text, bodyArea.text)
                             if (e) { errorText.show(e); return }
@@ -690,22 +700,22 @@ Popup {
             OTextField { id: field; Layout.fillWidth: true; placeholderText: prompt.placeholder; onAccepted: ok.clicked() }
             RowLayout {
                 Layout.alignment: Qt.AlignRight
-                OButton { text: "Vazgeç"; variant: "ghost"; onClicked: prompt.close() }
-                OButton { id: ok; text: "Oluştur"; variant: "primary"; enabled: field.text.trim().length > 0
+                OButton { text: qsTr("Vazgeç"); variant: "ghost"; onClicked: prompt.close() }
+                OButton { id: ok; text: qsTr("Oluştur"); variant: "primary"; enabled: field.text.trim().length > 0
                     onClicked: { prompt.close(); prompt.submitted(field.text.trim()) } }
             }
         }
     }
     NamePrompt {
         id: newProvider
-        heading: "Yeni sağlayıcı"
-        placeholder: "ör. LM Studio"
+        heading: qsTr("Yeni sağlayıcı")
+        placeholder: qsTr("ör. LM Studio")
         onSubmitted: v => { App.addProvider(v); dialog.refresh() }
     }
     NamePrompt {
         id: newPlugin
-        heading: "Yeni eklenti"
-        placeholder: "kimlik, ör. benim-araclarim"
+        heading: qsTr("Yeni eklenti")
+        placeholder: qsTr("kimlik, ör. benim-araclarim")
         onSubmitted: v => { const e = App.createPlugin(v); if (e) errorText.show(e); dialog.refresh() }
     }
     GitHubSkillDialog { id: githubSkillDialog; onInstalled: dialog.refresh() }
@@ -713,8 +723,8 @@ Popup {
     ConfirmDialog {
         id: removePluginConfirm
         property string targetId
-        heading: "Eklenti kaldırılsın mı?"
-        confirmText: "Kaldır"
+        heading: qsTr("Eklenti kaldırılsın mı?")
+        confirmText: qsTr("Kaldır")
         onConfirmed: { const e = App.removePlugin(targetId); if (e) errorText.show(e); dialog.refresh() }
     }
 
@@ -739,7 +749,7 @@ Popup {
                 if (id !== connectDialog.provider.id || !connectDialog.visible)
                     return
                 connectDialog.busy = false
-                if (ok) { connectDialog.close(); dialog.refresh(); successText.show(connectDialog.provider.name + " bağlandı · " + message) }
+                if (ok) { connectDialog.close(); dialog.refresh(); successText.show(connectDialog.provider.name + qsTr(" bağlandı · ") + message) }
                 else connectDialog.error = message
             }
         }
@@ -754,13 +764,13 @@ Popup {
                 }
                 ColumnLayout {
                     spacing: 1
-                    Text { text: (connectDialog.provider.name || "") + (connectDialog.provider.connected ? " bağlı" : " bağla"); font.family: Theme.font; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; color: Theme.text }
+                    Text { text: (connectDialog.provider.name || "") + (connectDialog.provider.connected ? qsTr(" bağlı") : qsTr(" bağla")); font.family: Theme.font; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; color: Theme.text }
                     Text { text: connectDialog.provider.description || ""; font.family: Theme.font; font.pixelSize: Theme.fontSmall; color: Theme.textMuted }
                 }
             }
             Text {
                 visible: (connectDialog.provider.keyUrl || "").length > 0
-                text: "<a href=\"" + connectDialog.provider.keyUrl + "\">API anahtarı al →</a>"
+                text: qsTr("<a href=\"") + connectDialog.provider.keyUrl + qsTr("\">API anahtarı al →</a>")
                 textFormat: Text.StyledText
                 linkColor: Theme.accent
                 font.family: Theme.font
@@ -771,7 +781,7 @@ Popup {
             OTextField {
                 id: keyField
                 Layout.fillWidth: true
-                placeholderText: connectDialog.provider.connected ? "Yeni anahtar yapıştır (değiştirmek için)" : "API anahtarını yapıştır"
+                placeholderText: connectDialog.provider.connected ? qsTr("Yeni anahtar yapıştır (değiştirmek için)") : qsTr("API anahtarını yapıştır")
                 echoMode: showKey.checked ? TextInput.Normal : TextInput.Password
                 rightPadding: 40
                 enabled: !connectDialog.busy
@@ -784,7 +794,7 @@ Popup {
                     anchors.verticalCenter: parent.verticalCenter
                     implicitWidth: 30; implicitHeight: 30
                     iconName: "info"
-                    tip: checked ? "Gizle" : "Göster"
+                    tip: checked ? qsTr("Gizle") : qsTr("Göster")
                     active: checked
                 }
             }
@@ -796,7 +806,7 @@ Popup {
                 font.family: Theme.font; font.pixelSize: Theme.fontSmall; color: Theme.danger
             }
             Text {
-                text: "Anahtar yalnızca bu bilgisayarda, Orbital'in ayar dosyasında saklanır."
+                text: qsTr("Anahtar yalnızca bu bilgisayarda, Orbital'in ayar dosyasında saklanır.")
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 font.family: Theme.font; font.pixelSize: Theme.fontCaption; color: Theme.textFaint
@@ -807,15 +817,15 @@ Popup {
                 spacing: 8
                 OButton {
                     visible: !!connectDialog.provider.connected
-                    text: "Bağlantıyı kaldır"
+                    text: qsTr("Bağlantıyı kaldır")
                     variant: "danger"
                     onClicked: { App.disconnectProvider(connectDialog.provider.id); connectDialog.close(); dialog.refresh() }
                 }
                 Item { Layout.fillWidth: true }
-                OButton { text: "Vazgeç"; variant: "ghost"; onClicked: connectDialog.close() }
+                OButton { text: qsTr("Vazgeç"); variant: "ghost"; onClicked: connectDialog.close() }
                 OButton {
                     id: connectButton
-                    text: connectDialog.busy ? "Kontrol ediliyor…" : "Bağla"
+                    text: connectDialog.busy ? qsTr("Kontrol ediliyor…") : qsTr("Bağla")
                     variant: "primary"
                     enabled: keyField.text.trim().length > 0 && !connectDialog.busy
                     onClicked: { connectDialog.error = ""; connectDialog.busy = true; App.connectProvider(connectDialog.provider.id, keyField.text) }
@@ -843,21 +853,21 @@ Popup {
                 if (id !== "custom" || !customDialog.visible)
                     return
                 customDialog.busy = false
-                if (ok) { customDialog.close(); dialog.refresh(); successText.show(cName.text + " bağlandı · " + message) }
+                if (ok) { customDialog.close(); dialog.refresh(); successText.show(cName.text + qsTr(" bağlandı · ") + message) }
                 else customDialog.error = message
             }
         }
         contentItem: ColumnLayout {
             spacing: 10
-            Text { text: "Özel sağlayıcı"; font.family: Theme.font; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; color: Theme.text }
+            Text { text: qsTr("Özel sağlayıcı"); font.family: Theme.font; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; color: Theme.text }
             Text {
-                text: "OpenAI uyumlu herhangi bir API (Together, Fireworks, Azure OpenAI, kendi sunucun…)."
+                text: qsTr("OpenAI uyumlu herhangi bir API (Together, Fireworks, Azure OpenAI, kendi sunucun…).")
                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                 font.family: Theme.font; font.pixelSize: Theme.fontSmall; color: Theme.textMuted
             }
-            OTextField { id: cName; Layout.fillWidth: true; placeholderText: "Ad (ör. Together)" }
-            OTextField { id: cUrl; Layout.fillWidth: true; placeholderText: "Adres (ör. https://api.together.xyz/v1)" }
-            OTextField { id: cKey; Layout.fillWidth: true; placeholderText: "API anahtarı"; echoMode: TextInput.Password }
+            OTextField { id: cName; Layout.fillWidth: true; placeholderText: qsTr("Ad (ör. Together)") }
+            OTextField { id: cUrl; Layout.fillWidth: true; placeholderText: qsTr("Adres (ör. https://api.together.xyz/v1)") }
+            OTextField { id: cKey; Layout.fillWidth: true; placeholderText: qsTr("API anahtarı"); echoMode: TextInput.Password }
             Text {
                 visible: customDialog.error.length > 0
                 text: customDialog.error
@@ -868,9 +878,9 @@ Popup {
                 Layout.topMargin: 6
                 Layout.alignment: Qt.AlignRight
                 spacing: 8
-                OButton { text: "Vazgeç"; variant: "ghost"; onClicked: customDialog.close() }
+                OButton { text: qsTr("Vazgeç"); variant: "ghost"; onClicked: customDialog.close() }
                 OButton {
-                    text: customDialog.busy ? "Kontrol ediliyor…" : "Ekle"
+                    text: customDialog.busy ? qsTr("Kontrol ediliyor…") : qsTr("Ekle")
                     variant: "primary"
                     enabled: cName.text.trim().length > 0 && cUrl.text.trim().length > 0 && !customDialog.busy
                     onClicked: { customDialog.error = ""; customDialog.busy = true; App.addCustomProvider(cName.text, cUrl.text, cKey.text) }

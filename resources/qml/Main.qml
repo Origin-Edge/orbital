@@ -10,7 +10,7 @@ ApplicationWindow {
     minimumWidth: 560
     minimumHeight: 480
     visible: true
-    title: App.sessionTitle.length ? App.sessionTitle + " — Orbital" : "Orbital"
+    title: App.sessionTitle.length ? App.sessionTitle + qsTr(" — Orbital") : qsTr("Orbital")
     color: Theme.bg
     font.family: Theme.font
 
@@ -97,7 +97,7 @@ ApplicationWindow {
                             spacing: 6
                             leftPadding: 10
                             Text {
-                                text: App.sessionTitle.length ? App.sessionTitle : (App.isNoFolder ? "Yeni sohbet" : App.projectName)
+                                text: App.sessionTitle.length ? App.sessionTitle : (App.isNoFolder ? qsTr("Yeni sohbet") : App.projectName)
                                 width: Math.min(implicitWidth, header.width - 200)
                                 elide: Text.ElideRight
                                 font.family: Theme.font
@@ -116,15 +116,15 @@ ApplicationWindow {
                         }
                         OMenu {
                             id: titleMenu
-                            OMenuItem { text: "Yeniden adlandır"; iconName: "pencil"; onTriggered: titleRename.ask(App.sessionId, App.sessionTitle) }
-                            OMenuItem { text: "Markdown olarak dışa aktar"; iconName: "file"; onTriggered: App.exportChatAsMarkdown() }
-                            OMenuItem { text: "Sohbeti sil"; iconName: "trash"; danger: true; onTriggered: titleDelete.open() }
+                            OMenuItem { text: qsTr("Yeniden adlandır"); iconName: "pencil"; onTriggered: titleRename.ask(App.sessionId, App.sessionTitle) }
+                            OMenuItem { text: qsTr("Markdown olarak dışa aktar"); iconName: "file"; onTriggered: App.exportChatAsMarkdown() }
+                            OMenuItem { text: qsTr("Sohbeti sil"); iconName: "trash"; danger: true; onTriggered: titleDelete.open() }
                         }
                     }
                     Item { Layout.fillWidth: true }
                     IconButton {
                         iconName: "panel-right"
-                        tip: window.panelOpen ? "Paneli kapat (Ctrl+Shift+B)" : "Oturum paneli (Ctrl+Shift+B)"
+                        tip: window.panelOpen ? qsTr("Paneli kapat (Ctrl+Shift+B)") : qsTr("Oturum paneli (Ctrl+Shift+B)")
                         onClicked: window.panelOpen = !window.panelOpen
                     }
                 }
@@ -160,7 +160,7 @@ ApplicationWindow {
                     OButton {
                         visible: App.statusIsError
                         implicitHeight: 28
-                        text: "Tekrar dene"
+                        text: qsTr("Tekrar dene")
                         variant: "ghost"
                         onClicked: App.retryEngine()
                     }
@@ -192,7 +192,7 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignHCenter
                     text: {
                         const h = new Date().getHours()
-                        return h < 6 ? "İyi geceler" : h < 12 ? "Günaydın" : h < 18 ? "İyi günler" : "İyi akşamlar"
+                        return h < 6 ? qsTr("İyi geceler") : h < 12 ? qsTr("Günaydın") : h < 18 ? qsTr("İyi günler") : qsTr("İyi akşamlar")
                     }
                     font.family: Theme.font
                     font.pixelSize: Theme.fontDisplay
@@ -201,7 +201,7 @@ ApplicationWindow {
                 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: App.isNoFolder ? "Bugün ne konuşalım?" : "<b>" + App.projectName + "</b> projesinde bugün ne yapalım?"
+                    text: App.isNoFolder ? qsTr("Bugün ne konuşalım?") : qsTr("<b>%1</b> projesinde bugün ne yapalım?").arg(App.projectName)
                     textFormat: Text.StyledText
                     font.family: Theme.font
                     font.pixelSize: Theme.fontBody
@@ -228,7 +228,7 @@ ApplicationWindow {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 9
-                    text: "Orbital hata yapabilir. Önemli değişiklikleri gözden geçir."
+                    text: qsTr("Orbital hata yapabilir. Önemli değişiklikleri gözden geçir.")
                     font.family: Theme.font
                     font.pixelSize: 12
                     color: Theme.textFaint
@@ -245,15 +245,15 @@ ApplicationWindow {
                 spacing: 8
                 Repeater {
                     model: App.isNoFolder ? [
-                        { icon: "bulb", label: "Fikir üret", prompt: "Bana bugün üzerinde çalışabileceğim 5 yaratıcı proje fikri öner, her biri için kısa bir açıklama yaz." },
-                        { icon: "file", label: "Metni düzelt", prompt: "Göndereceğim metnin yazım ve anlatım hatalarını düzelt, daha akıcı hale getir. Metin:" },
-                        { icon: "globe", label: "Bir konuyu anlat", prompt: "Bana yapay zekanın nasıl çalıştığını sade bir dille anlat." },
-                        { icon: "terminal", label: "Kod örneği", prompt: "Python'da bir klasördeki dosyaları boyutuna göre sıralayan kısa bir betik yaz ve açıkla." }
+                        { icon: "bulb", label: qsTr("Fikir üret"), prompt: qsTr("Bana bugün üzerinde çalışabileceğim 5 yaratıcı proje fikri öner, her biri için kısa bir açıklama yaz.") },
+                        { icon: "file", label: qsTr("Metni düzelt"), prompt: qsTr("Göndereceğim metnin yazım ve anlatım hatalarını düzelt, daha akıcı hale getir. Metin:") },
+                        { icon: "globe", label: qsTr("Bir konuyu anlat"), prompt: qsTr("Bana yapay zekanın nasıl çalıştığını sade bir dille anlat.") },
+                        { icon: "terminal", label: qsTr("Kod örneği"), prompt: qsTr("Python'da bir klasördeki dosyaları boyutuna göre sıralayan kısa bir betik yaz ve açıkla.") }
                     ] : [
-                        { icon: "search", label: "Projeyi açıkla", prompt: "Bu projenin yapısını incele: ne işe yaradığını, ana bileşenlerini ve önemli dosyalarını kısaca açıkla." },
-                        { icon: "terminal", label: "Derle ve test et", prompt: "Projeyi derle ve testleri çalıştır. Hata varsa sebebini bul ve düzelt." },
-                        { icon: "file", label: "README yaz", prompt: "Bu proje için kurulum, kullanım ve geliştirme adımlarını anlatan bir README.md yaz." },
-                        { icon: "check", label: "Değişiklikleri incele", prompt: "/review" }
+                        { icon: "search", label: qsTr("Projeyi açıkla"), prompt: qsTr("Bu projenin yapısını incele: ne işe yaradığını, ana bileşenlerini ve önemli dosyalarını kısaca açıkla.") },
+                        { icon: "terminal", label: qsTr("Derle ve test et"), prompt: qsTr("Projeyi derle ve testleri çalıştır. Hata varsa sebebini bul ve düzelt.") },
+                        { icon: "file", label: qsTr("README yaz"), prompt: qsTr("Bu proje için kurulum, kullanım ve geliştirme adımlarını anlatan bir README.md yaz.") },
+                        { icon: "check", label: qsTr("Değişiklikleri incele"), prompt: "/review" }
                     ]
                     delegate: AbstractButton {
                         id: chip
@@ -313,9 +313,9 @@ ApplicationWindow {
     }
     ConfirmDialog {
         id: titleDelete
-        heading: "Sohbet silinsin mi?"
-        message: "“" + App.sessionTitle + "” kalıcı olarak silinecek."
-        confirmText: "Sil"
+        heading: qsTr("Sohbet silinsin mi?")
+        message: "“" + App.sessionTitle + qsTr("” kalıcı olarak silinecek.")
+        confirmText: qsTr("Sil")
         onConfirmed: App.deleteSession(App.sessionId)
     }
 

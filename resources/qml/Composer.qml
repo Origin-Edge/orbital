@@ -101,7 +101,7 @@ Item {
                             anchors.rightMargin: 2
                             spacing: 8
                             Text {
-                                text: "Sırada " + (index + 1)
+                                text: qsTr("Sırada ") + (index + 1)
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontCaption
                                 font.weight: Font.Medium
@@ -153,7 +153,7 @@ Item {
 
                 TextArea {
                     id: input
-                    placeholderText: App.engineReady ? "Orbital'e bir şey sor…" : "Orbital'e bir şey sor…"
+                    placeholderText: App.engineReady ? qsTr("Orbital'e bir şey sor…") : qsTr("Orbital'e bir şey sor…")
                     placeholderTextColor: Theme.textFaint
                     wrapMode: TextArea.Wrap
                     font.family: Theme.font
@@ -268,14 +268,14 @@ Item {
                     implicitHeight: 30
                     visible: App.agents.length > 1 && !App.isNoFolder
                     model: App.agents.map(a => ({ value: a.id,
-                                                  label: a.id === "build" ? "Build" : a.id === "plan" ? "Plan" : a.id }))
+                                                  label: a.id === "build" ? qsTr("Build") : a.id === "plan" ? qsTr("Plan") : a.id }))
                     value: App.agent
                     onPicked: v => App.agent = v
                     ToolTip.visible: hovered
                     property bool hovered: false
                     HoverHandler { onHoveredChanged: parent.hovered = hovered }
                     ToolTip.delay: 700
-                    ToolTip.text: "Build: dosya düzenler, komut çalıştırır · Plan: yalnızca okur ve plan çıkarır"
+                    ToolTip.text: qsTr("Build: dosya düzenler, komut çalıştırır · Plan: yalnızca okur ve plan çıkarır")
                 }
 
                 // Auto mode warning: visible whenever Orbital runs without asking.
@@ -288,7 +288,7 @@ Item {
                     onClicked: App.disableAutoMode()
                     ToolTip.visible: hovered
                     ToolTip.delay: 400
-                    ToolTip.text: "Oto-mod açık: Orbital izin istemeden dosya yazar ve komut çalıştırır. Kapatmak için tıkla."
+                    ToolTip.text: qsTr("Oto-mod açık: Orbital izin istemeden dosya yazar ve komut çalıştırır. Kapatmak için tıkla.")
                     background: Rectangle {
                         radius: 15
                         color: autoBadge.hovered ? Theme.dangerSoft : Qt.alpha(Theme.danger, 0.10)
@@ -306,7 +306,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         Text {
-                            text: autoBadge.hovered ? "Oto-mod'u kapat" : "Oto-mod açık"
+                            text: autoBadge.hovered ? qsTr("Oto-mod'u kapat") : qsTr("Oto-mod açık")
                             font.family: Theme.font
                             font.pixelSize: Theme.fontCaption + 1
                             font.weight: Font.DemiBold
@@ -329,7 +329,7 @@ Item {
                     onClicked: App.busy ? App.stop() : root.send()
                     ToolTip.visible: hovered
                     ToolTip.delay: 600
-                    ToolTip.text: App.busy ? "Durdur (Esc)" : "Gönder (Enter)"
+                    ToolTip.text: App.busy ? qsTr("Durdur (Esc)") : qsTr("Gönder (Enter)")
                     background: Rectangle {
                         radius: 17
                         color: App.busy ? Theme.text

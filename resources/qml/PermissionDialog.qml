@@ -32,14 +32,14 @@ Popup {
             ColumnLayout {
                 spacing: 2
                 Text {
-                    text: "İzin gerekiyor"
+                    text: qsTr("İzin gerekiyor")
                     font.family: Theme.font
                     font.pixelSize: Theme.fontTitle
                     font.weight: Font.DemiBold
                     color: Theme.text
                 }
                 Text {
-                    text: "Orbital <b>" + (App.permission.tool || "") + "</b> aracını çalıştırmak istiyor."
+                    text: qsTr("Orbital <b>%1</b> aracını çalıştırmak istiyor.").arg(App.permission.tool || "")
                     textFormat: Text.StyledText
                     font.family: Theme.font
                     font.pixelSize: Theme.fontUi
@@ -73,10 +73,10 @@ Popup {
             Layout.topMargin: 8
             Layout.fillWidth: true
             spacing: 8
-            OButton { text: "Reddet"; variant: "danger"; onClicked: App.replyPermission("reject") }
+            OButton { text: qsTr("Reddet"); variant: "danger"; onClicked: App.replyPermission("reject") }
             Item { Layout.fillWidth: true }
-            OButton { text: "Bu oturumda hep"; variant: "secondary"; onClicked: App.replyPermission("always") }
-            OButton { text: "İzin ver"; variant: "primary"; onClicked: App.replyPermission("once"); focus: true }
+            OButton { text: qsTr("Bu oturumda hep"); variant: "secondary"; onClicked: App.replyPermission("always") }
+            OButton { text: qsTr("İzin ver"); variant: "primary"; onClicked: App.replyPermission("once"); focus: true }
         }
     }
 }

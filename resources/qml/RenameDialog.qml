@@ -35,14 +35,14 @@ Popup {
     contentItem: ColumnLayout {
         spacing: 12
         Text {
-            text: "Sohbet Başlığını Düzenle"
+            text: qsTr("Sohbet Başlığını Düzenle")
             font.family: Theme.font
             font.pixelSize: Theme.fontTitle
             font.weight: Font.DemiBold
             color: Theme.text
         }
         Text {
-            text: "Bu sohbet için yeni bir başlık belirleyin:"
+            text: qsTr("Bu sohbet için yeni bir başlık belirleyin:")
             font.family: Theme.font
             font.pixelSize: Theme.fontUi
             color: Theme.textMuted
@@ -50,16 +50,16 @@ Popup {
         OTextField {
             id: input
             Layout.fillWidth: true
-            placeholderText: "Sohbet başlığı"
+            placeholderText: qsTr("Sohbet başlığı")
             onAccepted: save()
         }
         RowLayout {
             Layout.topMargin: 10
             Layout.alignment: Qt.AlignRight
             spacing: 8
-            OButton { text: "Vazgeç"; variant: "ghost"; onClicked: dialog.close() }
+            OButton { text: qsTr("Vazgeç"); variant: "ghost"; onClicked: dialog.close() }
             OButton {
-                text: "Kaydet"
+                text: qsTr("Kaydet")
                 variant: "primary"
                 enabled: input.text.trim().length > 0
                 onClicked: save()

@@ -22,11 +22,11 @@ Popup {
     exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Theme.fast } }
 
     readonly property var durumYazi: ({
-        bekliyor: "Başlamak için küreye dokun",
-        dinliyor: Canli.dinle ? "Dinliyorum…" : "Mikrofon kapalı — yazarak sorabilirsin",
-        kayit: "Seni duyuyorum…",
-        dusunuyor: "Düşünüyorum…",
-        konusuyor: "Konuşuyor — sözünü kesmek için dokun"
+        bekliyor: qsTr("Başlamak için küreye dokun"),
+        dinliyor: Canli.dinle ? qsTr("Dinliyorum…") : qsTr("Mikrofon kapalı — yazarak sorabilirsin"),
+        kayit: qsTr("Seni duyuyorum…"),
+        dusunuyor: qsTr("Düşünüyorum…"),
+        konusuyor: qsTr("Konuşuyor — sözünü kesmek için dokun")
     })
 
     // Kamera: önizleme + son kareyi C++'a verme
@@ -49,19 +49,19 @@ Popup {
             anchors { left: parent.left; right: parent.right; top: parent.top; margins: 16 }
             spacing: 10
             Icon { name: "sparkle"; size: 20; color: Theme.accent }
-            Label { text: "ORBITAL Canlı"; color: Theme.text; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; font.family: Theme.font }
+            Label { text: qsTr("ORBITAL Canlı"); color: Theme.text; font.pixelSize: Theme.fontTitle; font.weight: Font.DemiBold; font.family: Theme.font }
             Item { Layout.fillWidth: true }
-            Label { text: "Sürekli izle"; color: Canli.goruntuAcik ? Theme.textMuted : Theme.textFaint; font.pixelSize: Theme.fontSmall; font.family: Theme.font }
+            Label { text: qsTr("Sürekli izle"); color: Canli.goruntuAcik ? Theme.textMuted : Theme.textFaint; font.pixelSize: Theme.fontSmall; font.family: Theme.font }
             OSwitch {
                 id: izleAnahtar
                 checked: Canli.izle
                 enabled: Canli.goruntuAcik
                 onToggled: Canli.izle = checked
                 ToolTip.visible: hovered
-                ToolTip.text: "Kamerayı belirli aralıkla izler, yalnızca bir şey değişince söyler"
+                ToolTip.text: qsTr("Kamerayı belirli aralıkla izler, yalnızca bir şey değişince söyler")
             }
             ComboBox {
-                model: ["8 sn", "15 sn", "30 sn"]
+                model: ["8 sn", qsTr("15 sn"), qsTr("30 sn")]
                 currentIndex: Canli.izleAralik <= 8 ? 0 : Canli.izleAralik <= 15 ? 1 : 2
                 enabled: Canli.goruntuAcik
                 implicitWidth: 92
@@ -91,8 +91,8 @@ Popup {
             }
             RowLayout {
                 anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 6 }
-                Label { text: "Kameran"; color: Theme.textMuted; font.pixelSize: Theme.fontCaption; Layout.fillWidth: true; leftPadding: 4 }
-                OButton { text: "Şimdi bak"; onClicked: Canli.simdiBak() }
+                Label { text: qsTr("Kameran"); color: Theme.textMuted; font.pixelSize: Theme.fontCaption; Layout.fillWidth: true; leftPadding: 4 }
+                OButton { text: qsTr("Şimdi bak"); onClicked: Canli.simdiBak() }
             }
         }
 
@@ -168,7 +168,7 @@ Popup {
                             model: modelData.kaynaklar || []
                             Label {
                                 required property var modelData
-                                text: "<a href=\"" + modelData.url + "\">" + String(modelData.url).replace(/^https?:\/\/(www\.)?/, "").split("/")[0] + "</a>"
+                                text: qsTr("<a href=\"") + modelData.url + "\">" + String(modelData.url).replace(/^https?:\/\/(www\.)?/, "").split("/")[0] + "</a>"
                                 textFormat: Text.StyledText
                                 linkColor: Theme.accent
                                 font.pixelSize: Theme.fontCaption
@@ -207,10 +207,10 @@ Popup {
                 OTextField {
                     id: yazi
                     Layout.fillWidth: true
-                    placeholderText: "Ya da yaz…"
+                    placeholderText: qsTr("Ya da yaz…")
                     onAccepted: { Canli.yaziyla(text); text = "" }
                 }
-                OButton { text: "Gönder"; variant: "primary"; onClicked: { Canli.yaziyla(yazi.text); yazi.text = "" } }
+                OButton { text: qsTr("Gönder"); variant: "primary"; onClicked: { Canli.yaziyla(yazi.text); yazi.text = "" } }
             }
 
             RowLayout {
@@ -231,29 +231,29 @@ Popup {
                 }
                 Kontrol {
                     ikon: "mic"; acik: Canli.aktif && Canli.dinle
-                    ToolTip.visible: hovered; ToolTip.text: Canli.dinle ? "Mikrofonu kapat" : "Mikrofonu aç"
+                    ToolTip.visible: hovered; ToolTip.text: Canli.dinle ? qsTr("Mikrofonu kapat") : qsTr("Mikrofonu aç")
                     onClicked: { if (!Canli.aktif) Canli.baslat(); else Canli.dinle = !Canli.dinle }
                 }
                 Kontrol {
                     ikon: "camera"; acik: Canli.goruntuAcik
-                    ToolTip.visible: hovered; ToolTip.text: Canli.goruntuAcik ? "Kamerayı kapat" : "Kamerayı aç"
+                    ToolTip.visible: hovered; ToolTip.text: Canli.goruntuAcik ? qsTr("Kamerayı kapat") : qsTr("Kamerayı aç")
                     onClicked: { kamera.active = !Canli.goruntuAcik; Canli.goruntuAcik = kamera.active }
                 }
                 Kontrol {
                     ikon: "volume"; acik: Canli.sesli
-                    ToolTip.visible: hovered; ToolTip.text: "Yanıtları sesli oku"
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Yanıtları sesli oku")
                     onClicked: Canli.sesli = !Canli.sesli
                 }
                 Kontrol {
                     ikon: "x"; tehlike: true
-                    ToolTip.visible: hovered; ToolTip.text: "Bitir"
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Bitir")
                     onClicked: ekran.close()
                 }
             }
 
             Label {
                 Layout.alignment: Qt.AlignHCenter
-                text: "Konuş, susunca ORBITAL yanıtlar. Kamera yalnızca sorduğunda ya da “Sürekli izle” açıkken gönderilir."
+                text: qsTr("Konuş, susunca ORBITAL yanıtlar. Kamera yalnızca sorduğunda ya da “Sürekli izle” açıkken gönderilir.")
                 color: Theme.textFaint
                 font.pixelSize: Theme.fontCaption
                 wrapMode: Text.Wrap

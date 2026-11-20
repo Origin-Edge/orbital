@@ -2,6 +2,9 @@
 QT       += core gui network quick quickcontrols2 svg multimedia texttospeech
 CONFIG   += c++17
 DEFINES  += QT_NO_KEYWORDS
+# Tek sürüm kaynağı: uygulama, Windows/macOS paket bilgisi ve güncelleme denetimi bunu kullanır.
+ORBITAL_SURUM = 0.5.13
+DEFINES  += ORBITAL_SURUM=\\\"$$ORBITAL_SURUM\\\"
 TARGET    = orbital
 TEMPLATE  = app
 
@@ -54,12 +57,12 @@ win32 {
     TARGET = Orbital
     QMAKE_TARGET_DESCRIPTION = Orbital
     QMAKE_TARGET_PRODUCT = Orbital
-    VERSION = 0.5.12
+    VERSION = $$ORBITAL_SURUM
     RC_ICONS = resources/orbital.ico
 }
 macx {
     TARGET = Orbital
-    VERSION = 0.5.12
+    VERSION = $$ORBITAL_SURUM
     ICON = resources/orbital.icns
     QMAKE_TARGET_BUNDLE_PREFIX = io.github.kefy266
     QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.0

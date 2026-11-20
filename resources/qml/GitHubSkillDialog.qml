@@ -55,7 +55,7 @@ Popup {
     contentItem: ColumnLayout {
         spacing: 12
         Text {
-            text: "GitHub'dan skill yükle"
+            text: qsTr("GitHub'dan skill yükle")
             font.family: Theme.font
             font.pixelSize: Theme.fontTitle
             font.weight: Font.DemiBold
@@ -64,7 +64,7 @@ Popup {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.Wrap
-            text: "Bir deponun ya da klasörün adresini yapıştır. İçindeki SKILL.md bulunan her klasör skill olarak yüklenir; aynı adlı skill varsa güncellenir."
+            text: qsTr("Bir deponun ya da klasörün adresini yapıştır. İçindeki SKILL.md bulunan her klasör skill olarak yüklenir; aynı adlı skill varsa güncellenir.")
             font.family: Theme.font
             font.pixelSize: Theme.fontUi
             color: Theme.textMuted
@@ -73,7 +73,7 @@ Popup {
             id: input
             Layout.fillWidth: true
             enabled: !dialog.busy
-            placeholderText: "github.com/kullanıcı/depo/tree/main/skills/ornek"
+            placeholderText: qsTr("github.com/kullanıcı/depo/tree/main/skills/ornek")
             onAccepted: dialog.install()
         }
         RowLayout {
@@ -84,7 +84,7 @@ Popup {
             Text {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
-                text: dialog.busy ? "İndiriliyor…" : dialog.message
+                text: dialog.busy ? qsTr("İndiriliyor…") : dialog.message
                 font.family: Theme.font
                 font.pixelSize: Theme.fontUi
                 color: dialog.busy ? Theme.textMuted : dialog.failed ? Theme.danger : Theme.success
@@ -94,9 +94,9 @@ Popup {
             Layout.topMargin: 6
             Layout.alignment: Qt.AlignRight
             spacing: 8
-            OButton { text: dialog.message.length > 0 && !dialog.failed ? "Kapat" : "Vazgeç"; variant: "ghost"; enabled: !dialog.busy; onClicked: dialog.close() }
+            OButton { text: dialog.message.length > 0 && !dialog.failed ? qsTr("Kapat") : qsTr("Vazgeç"); variant: "ghost"; enabled: !dialog.busy; onClicked: dialog.close() }
             OButton {
-                text: "Yükle"
+                text: qsTr("Yükle")
                 iconName: "download"
                 variant: "primary"
                 enabled: !dialog.busy && input.text.trim().length > 0

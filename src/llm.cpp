@@ -1,3 +1,5 @@
+#include <QLocale>
+#include <QCoreApplication>
 #include "llm.h"
 
 #include <QJsonDocument>
@@ -112,6 +114,8 @@ void LlmStream::startOpenAi(const LlmRequest &r)
     if (!key.isEmpty())
         req.setRawHeader("Authorization", "Bearer " + key.toUtf8());
     req.setRawHeader("X-Title", "Orbital");
+    // ORBITAL Web yanıt dilini arayüz dilinden alır (QLocale varsayılanı main.cpp'de ayarlanır).
+    req.setRawHeader("X-Orbital-Lang", QLocale().language() == QLocale::English ? "en" : "tr");
     req.setTransferTimeout(0);
     m_reply = m_nam->post(req, json(body));
 }
@@ -430,22 +434,22 @@ void testProvider(QNetworkAccessManager *nam, const ProviderConfig &provider,
         const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         const QByteArray body = reply->readAll();
         if (status == 401 || status == 403) {
-            done(false, QStringLiteral("API anahtarı geçersiz ya da yetkisiz."), {});
+            done(false, QCoreApplication::translate("Orbital", "API anahtarı geçersiz ya da yetkisiz."), {});
             return;
         }
         if (reply->error() != QNetworkReply::NoError && status == 0) {
-            done(false, QStringLiteral("Sunucuya ulaşılamadı: %1").arg(reply->errorString()), {});
+            done(false, QCoreApplication::translate("Orbital", "Sunucuya ulaşılamadı: %1").arg(reply->errorString()), {});
             return;
         }
         if (status >= 400) {
             const QString message = extractApiErrorMessage(body);
-            done(false, QStringLiteral("Sağlayıcı hata döndürdü (HTTP %1)%2").arg(status)
+            done(false, QCoreApplication::translate("Orbital", "Sağlayıcı hata döndürdü (HTTP %1)%2").arg(status)
                             .arg(message.isEmpty() ? QString() : QStringLiteral(": ") + message.left(200)), {});
             return;
         }
         QStringList models = parseModelIds(body, provider.modelFilter);
         if (models.isEmpty())
             models = provider.models;
-        done(true, QStringLiteral("%1 model bulundu").arg(models.size()), models);
+        done(true, QCoreApplication::translate("Orbital", "%1 model bulundu").arg(models.size()), models);
     });
 }

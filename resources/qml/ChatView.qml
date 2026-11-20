@@ -206,7 +206,7 @@ ListView {
                         spacing: 6
                         Icon { name: "bulb"; size: 15; color: Theme.textFaint; anchors.verticalCenter: parent.verticalCenter }
                         Text {
-                            text: "Düşünce süreci"
+                            text: qsTr("Düşünce süreci")
                             font.family: Theme.font
                             font.pixelSize: Theme.fontSmall
                             color: rhead.hovered ? Theme.textMuted : Theme.textFaint
@@ -390,7 +390,7 @@ ListView {
                         }
                         Text {
                             visible: ecol.friendly
-                            text: ecol.showDetail ? "Ayrıntıları gizle" : "Ayrıntılar"
+                            text: ecol.showDetail ? qsTr("Ayrıntıları gizle") : qsTr("Ayrıntılar")
                             font.family: Theme.font
                             font.pixelSize: Theme.fontCaption
                             color: Theme.textMuted

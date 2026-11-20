@@ -21,25 +21,25 @@ Rectangle {
     property var campaigns: [
         {
             "id": "blufy",
-            "name": "Blufy",
-            "tag": "Ücretsiz MP3/4 İndirici",
-            "desc": "blufy.oedge.xyz • Hızlı medya indirme",
+            "name": qsTr("Blufy"),
+            "tag": qsTr("Ücretsiz MP3/4 İndirici"),
+            "desc": qsTr("blufy.oedge.xyz • Hızlı medya indirme"),
             "url": "https://blufy.oedge.xyz",
             "icon": "download"
         },
         {
             "id": "convert",
-            "name": "EdgeConvert",
-            "tag": "Dosya Dönüştürücü",
-            "desc": "convert.oedge.xyz • Medya dönüştürme",
+            "name": qsTr("EdgeConvert"),
+            "tag": qsTr("Dosya Dönüştürücü"),
+            "desc": qsTr("convert.oedge.xyz • Medya dönüştürme"),
             "url": "https://convert.oedge.xyz",
             "icon": "refresh"
         },
         {
             "id": "hizmet",
-            "name": "Origin Edge Hizmet",
-            "tag": "Web & Tasarım",
-            "desc": "hizmet.oedge.xyz • Hosting & Web Çözümleri",
+            "name": qsTr("Origin Edge Hizmet"),
+            "tag": qsTr("Web & Tasarım"),
+            "desc": qsTr("hizmet.oedge.xyz • Hosting & Web Çözümleri"),
             "url": "https://hizmet.oedge.xyz",
             "icon": "globe"
         }
@@ -122,7 +122,7 @@ Rectangle {
                     Text {
                         id: tagText
                         anchors.centerIn: parent
-                        text: "SPONSOR"
+                        text: qsTr("SPONSOR")
                         font.family: Theme.font
                         font.pixelSize: 8
                         font.weight: Font.Bold

@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "nativeengine.h"
 
 #include "config.h"
@@ -109,7 +110,7 @@ void NativeEngine::renameSession(const QString &id, const QString &title, Done d
 {
     QJsonObject s = loadSession(id);
     if (s.isEmpty()) {
-        if (done) done(QStringLiteral("Oturum bulunamadı"));
+        if (done) done(QCoreApplication::translate("Orbital", "Oturum bulunamadı"));
         return;
     }
     s.insert(QStringLiteral("title"), title);

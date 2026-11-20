@@ -59,13 +59,13 @@ Popup {
                 ColumnLayout {
                     spacing: 2
                     Layout.fillWidth: true
-                    Text { text: "Mağaza"; font.family: Theme.font; font.pixelSize: 22; font.weight: Font.DemiBold; color: Theme.text }
+                    Text { text: qsTr("Mağaza"); font.family: Theme.font; font.pixelSize: 22; font.weight: Font.DemiBold; color: Theme.text }
                     Text {
-                        text: "Orbital'e yeni skill'ler ve eklentiler ekle. Yüklediklerin hemen kullanılabilir."
+                        text: qsTr("Orbital'e yeni skill'ler ve eklentiler ekle. Yüklediklerin hemen kullanılabilir.")
                         font.family: Theme.font; font.pixelSize: Theme.fontUi; color: Theme.textMuted
                     }
                 }
-                OButton { Layout.alignment: Qt.AlignTop; text: "GitHub'dan skill"; iconName: "download"; variant: "ghost"; onClicked: githubSkillDialog.openDialog() }
+                OButton { Layout.alignment: Qt.AlignTop; text: qsTr("GitHub'dan skill"); iconName: "download"; variant: "ghost"; onClicked: githubSkillDialog.openDialog() }
                 IconButton { Layout.alignment: Qt.AlignTop; iconName: "x"; tip: "Kapat (Esc)"; onClicked: store.close() }
             }
             RowLayout {
@@ -74,11 +74,11 @@ Popup {
                     id: search
                     Layout.fillWidth: true
                     iconName: "search"
-                    placeholderText: "Skill ya da eklenti ara"
+                    placeholderText: qsTr("Skill ya da eklenti ara")
                 }
                 Segmented {
                     implicitHeight: 38
-                    model: [{ value: "all", label: "Tümü" }, { value: "skill", label: "Skill'ler", icon: "sparkle" }, { value: "plugin", label: "Eklentiler", icon: "blocks" }]
+                    model: [{ value: "all", label: qsTr("Tümü") }, { value: "skill", label: qsTr("Skill'ler"), icon: "sparkle" }, { value: "plugin", label: qsTr("Eklentiler"), icon: "blocks" }]
                     value: store.filter
                     onPicked: v => store.filter = v
                 }
@@ -98,14 +98,14 @@ Popup {
                 Spinner { Layout.alignment: Qt.AlignHCenter; visible: App.storeLoading; width: 24; height: 24 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: App.storeLoading ? "Mağaza yükleniyor…" : App.storeError
+                    text: App.storeLoading ? qsTr("Mağaza yükleniyor…") : App.storeError
                     font.family: Theme.font; font.pixelSize: Theme.fontUi
                     color: App.storeError.length ? Theme.danger : Theme.textMuted
                 }
                 OButton {
                     Layout.alignment: Qt.AlignHCenter
                     visible: !App.storeLoading && App.storeError.length > 0
-                    text: "Tekrar dene"
+                    text: qsTr("Tekrar dene")
                     iconName: "refresh"
                     onClicked: App.loadStore()
                 }
@@ -171,7 +171,7 @@ Popup {
                                         font.family: Theme.font; font.pixelSize: Theme.fontUi + 1; font.weight: Font.DemiBold; color: Theme.text
                                     }
                                     Text {
-                                        text: (cell.modelData.type === "plugin" ? "Eklenti" : "Skill") + " · " + cell.modelData.author + " · v" + cell.modelData.version
+                                        text: (cell.modelData.type === "plugin" ? qsTr("Eklenti") : qsTr("Skill")) + " · " + cell.modelData.author + qsTr(" · v") + cell.modelData.version
                                         font.family: Theme.font; font.pixelSize: Theme.fontCaption; color: Theme.textFaint
                                     }
                                 }
@@ -191,7 +191,7 @@ Popup {
                                 spacing: 5
                                 Icon { name: "alert"; size: 13; color: Theme.textFaint }
                                 Text {
-                                    text: "Bilgisayarında komut çalıştırabilir"
+                                    text: qsTr("Bilgisayarında komut çalıştırabilir")
                                     font.family: Theme.font; font.pixelSize: Theme.fontCaption; color: Theme.textFaint
                                 }
                             }
@@ -215,7 +215,7 @@ Popup {
                                 OButton {
                                     visible: cell.modelData.installed && !cell.modelData.busy
                                     implicitHeight: 30
-                                    text: "Kaldır"
+                                    text: qsTr("Kaldır")
                                     variant: "ghost"
                                     onClicked: App.removeStoreItem(cell.modelData.id)
                                 }
@@ -230,13 +230,13 @@ Popup {
                                         anchors.centerIn: parent
                                         spacing: 4
                                         Icon { name: "check"; size: 14; color: Theme.success; anchors.verticalCenter: parent.verticalCenter }
-                                        Text { text: "Yüklü"; font.family: Theme.font; font.pixelSize: Theme.fontSmall; font.weight: Font.Medium; color: Theme.success; anchors.verticalCenter: parent.verticalCenter }
+                                        Text { text: qsTr("Yüklü"); font.family: Theme.font; font.pixelSize: Theme.fontSmall; font.weight: Font.Medium; color: Theme.success; anchors.verticalCenter: parent.verticalCenter }
                                     }
                                 }
                                 OButton {
                                     visible: !cell.modelData.installed && !cell.modelData.busy
                                     implicitHeight: 30
-                                    text: "Yükle"
+                                    text: qsTr("Yükle")
                                     iconName: "download"
                                     variant: "primary"
                                     onClicked: App.installStoreItem(cell.modelData.id)
@@ -249,7 +249,7 @@ Popup {
                 Text {
                     anchors.centerIn: parent
                     visible: grid.count === 0
-                    text: "Sonuç bulunamadı"
+                    text: qsTr("Sonuç bulunamadı")
                     font.family: Theme.font; font.pixelSize: Theme.fontUi; color: Theme.textFaint
                 }
             }

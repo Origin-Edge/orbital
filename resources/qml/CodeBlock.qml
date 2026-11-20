@@ -63,7 +63,7 @@ Rectangle {
                     opacity: publish.enabled ? 1 : 0.5
                     Icon { name: "globe"; size: 14; color: Theme.textMuted; anchors.verticalCenter: parent.verticalCenter }
                     Text {
-                        text: App.publishing ? "Yayınlanıyor…" : "Yayınla"
+                        text: App.publishing ? qsTr("Yayınlanıyor…") : qsTr("Yayınla")
                         font.family: Theme.font
                         font.pixelSize: Theme.fontCaption
                         color: Theme.textMuted
@@ -90,7 +90,7 @@ Rectangle {
                     leftPadding: 8
                     Icon { name: copy.done ? "check" : "copy"; size: 14; color: copy.done ? Theme.success : Theme.textMuted; anchors.verticalCenter: parent.verticalCenter }
                     Text {
-                        text: copy.done ? "Kopyalandı" : "Kopyala"
+                        text: copy.done ? qsTr("Kopyalandı") : qsTr("Kopyala")
                         font.family: Theme.font
                         font.pixelSize: Theme.fontCaption
                         color: Theme.textMuted

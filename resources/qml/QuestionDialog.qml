@@ -136,14 +136,14 @@ Popup {
                 spacing: 2
                 Layout.fillWidth: true
                 Text {
-                    text: "Bilgi gerekiyor"
+                    text: qsTr("Bilgi gerekiyor")
                     font.family: Theme.font
                     font.pixelSize: Theme.fontTitle
                     font.weight: Font.DemiBold
                     color: Theme.text
                 }
                 Text {
-                    text: "Asistan devam edebilmek için tercihinizi öğrenmek istiyor."
+                    text: qsTr("Asistan devam edebilmek için tercihinizi öğrenmek istiyor.")
                     font.family: Theme.font
                     font.pixelSize: Theme.fontSmall
                     color: Theme.textMuted
@@ -202,7 +202,7 @@ Popup {
                             }
 
                             Text {
-                                text: isMultiple ? "Birden fazla seçilebilir" : "Tek seçenek"
+                                text: isMultiple ? qsTr("Birden fazla seçilebilir") : qsTr("Tek seçenek")
                                 font.family: Theme.font
                                 font.pixelSize: Theme.fontCaption
                                 color: Theme.textFaint
@@ -327,7 +327,7 @@ Popup {
                             id: customInput
                             Layout.fillWidth: true
                             iconName: "pencil"
-                            placeholderText: "Farklı bir yanıt yazın (isteğe bağlı)..."
+                            placeholderText: qsTr("Farklı bir yanıt yazın (isteğe bağlı)...")
                             text: dialog.customInputs[questionCard.qIndex] || ""
                             onTextChanged: {
                                 dialog.setCustomText(questionCard.qIndex, text);
@@ -355,7 +355,7 @@ Popup {
             spacing: 8
 
             OButton {
-                text: "Reddet"
+                text: qsTr("Reddet")
                 variant: "danger"
                 onClicked: App.rejectQuestion()
             }
@@ -363,7 +363,7 @@ Popup {
             Item { Layout.fillWidth: true }
 
             OButton {
-                text: "Yanıtla"
+                text: qsTr("Yanıtla")
                 variant: "primary"
                 enabled: dialog.canSubmit()
                 focus: true

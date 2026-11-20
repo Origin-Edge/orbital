@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include "chatmodel.h"
 
 #include <QDateTime>
@@ -20,36 +21,36 @@ QString toolTitle(const QString &name)
     const QString browser = browserAction(name);
     if (!browser.isEmpty()) {
         static const QHash<QString, QString> actions{
-            {QStringLiteral("navigate"), QStringLiteral("Sayfa açıldı")},
-            {QStringLiteral("navigate_back"), QStringLiteral("Geri gidildi")},
-            {QStringLiteral("snapshot"), QStringLiteral("Sayfa okundu")},
-            {QStringLiteral("take_screenshot"), QStringLiteral("Ekran görüntüsü alındı")},
-            {QStringLiteral("click"), QStringLiteral("Tıklandı")},
-            {QStringLiteral("type"), QStringLiteral("Yazıldı")},
-            {QStringLiteral("fill_form"), QStringLiteral("Form dolduruldu")},
-            {QStringLiteral("select_option"), QStringLiteral("Seçim yapıldı")},
-            {QStringLiteral("press_key"), QStringLiteral("Tuşa basıldı")},
-            {QStringLiteral("hover"), QStringLiteral("İmleç getirildi")},
-            {QStringLiteral("wait_for"), QStringLiteral("Sayfa beklendi")},
-            {QStringLiteral("tabs"), QStringLiteral("Sekmeler")},
-            {QStringLiteral("find"), QStringLiteral("Sayfada arandı")},
-            {QStringLiteral("close"), QStringLiteral("Tarayıcı kapatıldı")},
+            {QStringLiteral("navigate"), QCoreApplication::translate("Orbital", "Sayfa açıldı")},
+            {QStringLiteral("navigate_back"), QCoreApplication::translate("Orbital", "Geri gidildi")},
+            {QStringLiteral("snapshot"), QCoreApplication::translate("Orbital", "Sayfa okundu")},
+            {QStringLiteral("take_screenshot"), QCoreApplication::translate("Orbital", "Ekran görüntüsü alındı")},
+            {QStringLiteral("click"), QCoreApplication::translate("Orbital", "Tıklandı")},
+            {QStringLiteral("type"), QCoreApplication::translate("Orbital", "Yazıldı")},
+            {QStringLiteral("fill_form"), QCoreApplication::translate("Orbital", "Form dolduruldu")},
+            {QStringLiteral("select_option"), QCoreApplication::translate("Orbital", "Seçim yapıldı")},
+            {QStringLiteral("press_key"), QCoreApplication::translate("Orbital", "Tuşa basıldı")},
+            {QStringLiteral("hover"), QCoreApplication::translate("Orbital", "İmleç getirildi")},
+            {QStringLiteral("wait_for"), QCoreApplication::translate("Orbital", "Sayfa beklendi")},
+            {QStringLiteral("tabs"), QCoreApplication::translate("Orbital", "Sekmeler")},
+            {QStringLiteral("find"), QCoreApplication::translate("Orbital", "Sayfada arandı")},
+            {QStringLiteral("close"), QCoreApplication::translate("Orbital", "Tarayıcı kapatıldı")},
         };
-        return actions.value(browser, QStringLiteral("Tarayıcı"));
+        return actions.value(browser, QCoreApplication::translate("Orbital", "Tarayıcı"));
     }
     static const QHash<QString, QString> titles{
-        {QStringLiteral("read"), QStringLiteral("Dosya okundu")},
-        {QStringLiteral("write"), QStringLiteral("Dosya yazıldı")},
-        {QStringLiteral("edit"), QStringLiteral("Dosya düzenlendi")},
-        {QStringLiteral("bash"), QStringLiteral("Komut çalıştırıldı")},
-        {QStringLiteral("shell"), QStringLiteral("Komut çalıştırıldı")},
-        {QStringLiteral("list"), QStringLiteral("Klasör listelendi")},
-        {QStringLiteral("glob"), QStringLiteral("Dosyalar arandı")},
-        {QStringLiteral("grep"), QStringLiteral("İçerik arandı")},
-        {QStringLiteral("skill"), QStringLiteral("Skill yüklendi")},
-        {QStringLiteral("webfetch"), QStringLiteral("Web sayfası okundu")},
-        {QStringLiteral("todowrite"), QStringLiteral("Yapılacaklar güncellendi")},
-        {QStringLiteral("task"), QStringLiteral("Alt görev")},
+        {QStringLiteral("read"), QCoreApplication::translate("Orbital", "Dosya okundu")},
+        {QStringLiteral("write"), QCoreApplication::translate("Orbital", "Dosya yazıldı")},
+        {QStringLiteral("edit"), QCoreApplication::translate("Orbital", "Dosya düzenlendi")},
+        {QStringLiteral("bash"), QCoreApplication::translate("Orbital", "Komut çalıştırıldı")},
+        {QStringLiteral("shell"), QCoreApplication::translate("Orbital", "Komut çalıştırıldı")},
+        {QStringLiteral("list"), QCoreApplication::translate("Orbital", "Klasör listelendi")},
+        {QStringLiteral("glob"), QCoreApplication::translate("Orbital", "Dosyalar arandı")},
+        {QStringLiteral("grep"), QCoreApplication::translate("Orbital", "İçerik arandı")},
+        {QStringLiteral("skill"), QCoreApplication::translate("Orbital", "Skill yüklendi")},
+        {QStringLiteral("webfetch"), QCoreApplication::translate("Orbital", "Web sayfası okundu")},
+        {QStringLiteral("todowrite"), QCoreApplication::translate("Orbital", "Yapılacaklar güncellendi")},
+        {QStringLiteral("task"), QCoreApplication::translate("Orbital", "Alt görev")},
     };
     return titles.value(name, name);
 }
@@ -420,7 +421,7 @@ QString ChatModel::friendlyError(const QString &raw, const QString &modelName)
 {
     const QString l = raw.toLower();
     const QString provider = providerName(l);
-    const QString who = provider.isEmpty() ? QStringLiteral("Sağlayıcı") : provider;
+    const QString who = provider.isEmpty() ? QCoreApplication::translate("Orbital", "Sağlayıcı") : provider;
     QString model = modelName;
     if (model.isEmpty()) {
         static const QRegularExpression m(QStringLiteral(R"(model:\s*([\w.\-/:]+))"));
@@ -428,7 +429,7 @@ QString ChatModel::friendlyError(const QString &raw, const QString &modelName)
     }
     const QString subject = model.isEmpty() ? QStringLiteral("Bu model") : model;
     const QString wait = retryText(l);
-    const QString later = wait.isEmpty() ? QString() : QStringLiteral(" Yaklaşık %1 sonra yeniden kullanılabilir.").arg(wait);
+    const QString later = wait.isEmpty() ? QString() : QCoreApplication::translate("Orbital", " Yaklaşık %1 sonra yeniden kullanılabilir.").arg(wait);
     const auto has = [&l](std::initializer_list<const char *> keys) {
         for (const char *k : keys)
             if (l.contains(QLatin1String(k)))
@@ -438,43 +439,43 @@ QString ChatModel::friendlyError(const QString &raw, const QString &modelName)
     QString title, hint;
 
     if (has({"limit: 0", "limit:0"}) && has({"free_tier", "free tier"})) {
-        title = QStringLiteral("%1 ücretsiz katmanda kullanılamıyor.").arg(subject);
-        hint = QStringLiteral("%1 bu model için ücretsiz kota vermiyor. Hesabında faturalandırmayı aç ya da başka bir model seç.").arg(who);
+        title = QCoreApplication::translate("Orbital", "%1 ücretsiz katmanda kullanılamıyor.").arg(subject);
+        hint = QCoreApplication::translate("Orbital", "%1 bu model için ücretsiz kota vermiyor. Hesabında faturalandırmayı aç ya da başka bir model seç.").arg(who);
     } else if (has({"credit balance", "insufficient_quota", "exceeded your current quota", "billing", "payment required",
                     "insufficient balance", "insufficient credits", "402"})) {
-        title = QStringLiteral("%1 hesabının kotası ya da bakiyesi bitti.").arg(who);
-        hint = QStringLiteral("Plan ve fatura ayarlarını kontrol et ya da başka bir model seç.") + later;
+        title = QCoreApplication::translate("Orbital", "%1 hesabının kotası ya da bakiyesi bitti.").arg(who);
+        hint = QCoreApplication::translate("Orbital", "Plan ve fatura ayarlarını kontrol et ya da başka bir model seç.") + later;
     } else if (!has({"per day", "daily"}) && has({"rate limit", "rate_limit", "too many requests", "resource_exhausted", "resourceexhausted", "429"})) {
-        title = QStringLiteral("Çok hızlı istek gönderildi.");
-        hint = QStringLiteral("%1 kısa süreli bir sınıra takıldı; biraz bekleyip tekrar dene.").arg(who) + later;
+        title = QCoreApplication::translate("Orbital", "Çok hızlı istek gönderildi.");
+        hint = QCoreApplication::translate("Orbital", "%1 kısa süreli bir sınıra takıldı; biraz bekleyip tekrar dene.").arg(who) + later;
     } else if (has({"per day", "daily", "free usage", "usage limit", "limit reached", "quota", "resource_exhausted", "resourceexhausted", "429"})) {
-        title = QStringLiteral("%1 kullanım sınırına ulaştı.").arg(subject);
-        hint = QStringLiteral("Başka bir model seçebilirsin.") + later;
+        title = QCoreApplication::translate("Orbital", "%1 kullanım sınırına ulaştı.").arg(subject);
+        hint = QCoreApplication::translate("Orbital", "Başka bir model seçebilirsin.") + later;
     } else if (has({"overloaded", "503", "service unavailable", "temporarily unavailable", "capacity"})) {
-        title = QStringLiteral("%1 şu an çok yoğun.").arg(who);
-        hint = QStringLiteral("Birazdan tekrar dene ya da başka bir model seç.");
+        title = QCoreApplication::translate("Orbital", "%1 şu an çok yoğun.").arg(who);
+        hint = QCoreApplication::translate("Orbital", "Birazdan tekrar dene ya da başka bir model seç.");
     } else if (has({"invalid api key", "incorrect api key", "api key not valid", "invalid_api_key", "invalid x-api-key",
                     "unauthorized", "401", "authentication"})) {
-        title = QStringLiteral("%1 API anahtarı geçersiz.").arg(who);
-        hint = QStringLiteral("Ayarlar → Sağlayıcılar'dan anahtarı kontrol edip yeniden bağla.");
+        title = QCoreApplication::translate("Orbital", "%1 API anahtarı geçersiz.").arg(who);
+        hint = QCoreApplication::translate("Orbital", "Ayarlar → Sağlayıcılar'dan anahtarı kontrol edip yeniden bağla.");
     } else if (has({"permission denied", "permission_denied", "403", "forbidden", "not allowed"})) {
-        title = QStringLiteral("%1 bu isteğe izin vermedi.").arg(who);
-        hint = QStringLiteral("Anahtarının bu modele erişimi olmayabilir; başka bir model seç ya da hesabını kontrol et.");
+        title = QCoreApplication::translate("Orbital", "%1 bu isteğe izin vermedi.").arg(who);
+        hint = QCoreApplication::translate("Orbital", "Anahtarının bu modele erişimi olmayabilir; başka bir model seç ya da hesabını kontrol et.");
     } else if (has({"context length", "context_length", "maximum context", "too many tokens", "prompt is too long",
                     "context window", "maximum number of tokens"})) {
-        title = QStringLiteral("Sohbet modelin bağlam sınırını aştı.");
-        hint = QStringLiteral("Yeni bir sohbet başlat ya da daha büyük bağlamlı bir model seç.");
+        title = QCoreApplication::translate("Orbital", "Sohbet modelin bağlam sınırını aştı.");
+        hint = QCoreApplication::translate("Orbital", "Yeni bir sohbet başlat ya da daha büyük bağlamlı bir model seç.");
     } else if (has({"model not found", "model_not_found", "does not exist", "not supported", "no longer available",
                     "unknown model", "404"})) {
-        title = QStringLiteral("%1 bulunamadı ya da artık sunulmuyor.").arg(subject);
-        hint = QStringLiteral("Başka bir model seç.");
+        title = QCoreApplication::translate("Orbital", "%1 bulunamadı ya da artık sunulmuyor.").arg(subject);
+        hint = QCoreApplication::translate("Orbital", "Başka bir model seç.");
     } else if (has({"safety", "content_filter", "content filter", "blocked", "moderation"})) {
-        title = QStringLiteral("%1 bu isteği güvenlik filtresi nedeniyle yanıtlamadı.").arg(who);
-        hint = QStringLiteral("İsteği farklı ifade etmeyi dene.");
+        title = QCoreApplication::translate("Orbital", "%1 bu isteği güvenlik filtresi nedeniyle yanıtlamadı.").arg(who);
+        hint = QCoreApplication::translate("Orbital", "İsteği farklı ifade etmeyi dene.");
     } else if (has({"timed out", "timeout", "connection refused", "could not resolve", "network", "econnreset",
                     "host not found", "ssl"})) {
-        title = QStringLiteral("Sağlayıcıya ulaşılamadı.");
-        hint = QStringLiteral("İnternet bağlantını kontrol edip tekrar dene.");
+        title = QCoreApplication::translate("Orbital", "Sağlayıcıya ulaşılamadı.");
+        hint = QCoreApplication::translate("Orbital", "İnternet bağlantını kontrol edip tekrar dene.");
     } else {
         return {};
     }
@@ -596,15 +597,15 @@ QString ChatModel::lastUserPrompt() const
 QString ChatModel::exportMarkdown(const QString &sessionTitle, const QString &projectName) const
 {
     QString out = QStringLiteral("# %1\n\n_Proje: %2_\n\n---\n\n")
-                      .arg(sessionTitle.isEmpty() ? QStringLiteral("Orbital Sohbeti") : sessionTitle,
-                           projectName.isEmpty() ? QStringLiteral("Proje") : projectName);
+                      .arg(sessionTitle.isEmpty() ? QCoreApplication::translate("Orbital", "Orbital Sohbeti") : sessionTitle,
+                           projectName.isEmpty() ? QCoreApplication::translate("Orbital", "Proje") : projectName);
     for (const Item &it : m_items) {
         if (it.kind == QLatin1String("user")) {
-            out += QStringLiteral("### 👤 Kullanıcı\n\n%1\n\n").arg(it.text);
+            out += QCoreApplication::translate("Orbital", "### 👤 Kullanıcı\n\n%1\n\n").arg(it.text);
         } else if (it.kind == QLatin1String("text")) {
             out += QStringLiteral("### 🤖 Orbital\n\n%1\n\n").arg(it.text);
         } else if (it.kind == QLatin1String("tool")) {
-            out += QStringLiteral("> ⚙️ **Araç:** `%1` (%2)\n\n").arg(it.toolName, it.toolStatus);
+            out += QCoreApplication::translate("Orbital", "> ⚙️ **Araç:** `%1` (%2)\n\n").arg(it.toolName, it.toolStatus);
         } else if (it.kind == QLatin1String("error")) {
             out += QStringLiteral("> ⚠️ **Hata:** %1\n\n").arg(it.text);
         }
@@ -633,12 +634,12 @@ QVariant SessionModel::data(const QModelIndex &index, int role) const
     case IdRole: return r.id;
     case TitleRole:
         // The engine names untitled sessions "New session - <timestamp>".
-        return r.title.isEmpty() || r.title.startsWith(QStringLiteral("New session - ")) ? QStringLiteral("Yeni sohbet") : r.title;
+        return r.title.isEmpty() || r.title.startsWith(QStringLiteral("New session - ")) ? QCoreApplication::translate("Orbital", "Yeni sohbet") : r.title;
     case TimeRole: return QDateTime::fromMSecsSinceEpoch(r.updated).toString(QStringLiteral("dd.MM.yyyy HH:mm"));
     case DirectoryRole: return r.directory;
     case ProjectNameRole: {
         if (r.directory.isEmpty() || r.directory == Paths::noFolderDir())
-            return QStringLiteral("Klasörsüz (no-folder)");
+            return QCoreApplication::translate("Orbital", "Klasörsüz (no-folder)");
         const QString name = QDir(r.directory).dirName();
         return name.isEmpty() ? r.directory : name;
     }
@@ -646,14 +647,14 @@ QVariant SessionModel::data(const QModelIndex &index, int role) const
         const QDate d = QDateTime::fromMSecsSinceEpoch(r.updated).date();
         const QDate today = QDate::currentDate();
         if (d >= today)
-            return QStringLiteral("Bugün");
+            return QCoreApplication::translate("Orbital", "Bugün");
         if (d == today.addDays(-1))
-            return QStringLiteral("Dün");
+            return QCoreApplication::translate("Orbital", "Dün");
         if (d > today.addDays(-7))
-            return QStringLiteral("Önceki 7 gün");
+            return QCoreApplication::translate("Orbital", "Önceki 7 gün");
         if (d > today.addDays(-30))
-            return QStringLiteral("Önceki 30 gün");
-        return QStringLiteral("Daha eski");
+            return QCoreApplication::translate("Orbital", "Önceki 30 gün");
+        return QCoreApplication::translate("Orbital", "Daha eski");
     }
     default: return {};
     }

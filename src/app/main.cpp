@@ -13,6 +13,7 @@
 #include <QQuickWindow>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QTranslator>
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QGuiApplication::setApplicationName(QStringLiteral("Orbital"));
     QGuiApplication::setOrganizationName(QStringLiteral("Orbital"));
-    QGuiApplication::setApplicationVersion(QStringLiteral("0.5.9"));
+    QGuiApplication::setApplicationVersion(QStringLiteral(ORBITAL_SURUM));
     // Snap'te menü girişi <snap>_<uygulama>.desktop; Wayland app_id aynı olmalı ki görev çubuğu simgeyi bulsun
     const QString snapAdi = qEnvironmentVariable("SNAP_INSTANCE_NAME");
     QGuiApplication::setDesktopFileName(snapAdi.isEmpty() ? QStringLiteral("orbital")
@@ -35,6 +36,17 @@ int main(int argc, char *argv[])
         QGuiApplication::setFont(QFont(QStringLiteral("Inter"), 10));
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 
+    // Kaynak dil Türkçe; İngilizce için :/i18n/orbital_en.qm yüklenir. Dil değişince arayüz anında çevrilir.
+    QTranslator ceviri;
+    auto dilUygula = [&app, &ceviri]() {
+        QCoreApplication::removeTranslator(&ceviri);
+        if (AppController::resolvedLanguage() == QLatin1String("en") && ceviri.load(QStringLiteral(":/i18n/orbital_en.qm")))
+            QCoreApplication::installTranslator(&ceviri);
+        QLocale::setDefault(QLocale(AppController::resolvedLanguage() == QLatin1String("en") ? QLocale::English : QLocale::Turkish));
+        Q_UNUSED(app)
+    };
+    dilUygula();
+
     AppController controller;
     qmlRegisterSingletonInstance("Orbital", 1, 0, "App", &controller);
     Canli canli;
@@ -42,7 +54,12 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<ChatModel>("Orbital", 1, 0, "ChatModel", QStringLiteral("provided by App"));
     qmlRegisterUncreatableType<SessionModel>("Orbital", 1, 0, "SessionModel", QStringLiteral("provided by App"));
 
+
     QQmlApplicationEngine engine;
+    QObject::connect(&controller, &AppController::languageChanged, &engine, [&engine, dilUygula] {
+        dilUygula();
+        engine.retranslate();
+    });
     engine.addImageProvider(QStringLiteral("icon"), new IconProvider);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);

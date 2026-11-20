@@ -56,6 +56,8 @@ class AppController : public QObject
     Q_PROPERTY(QVariantMap question READ question NOTIFY questionChanged)
     Q_PROPERTY(QStringList promptHistory READ promptHistory NOTIFY promptHistoryChanged)
     Q_PROPERTY(QString themeMode READ themeMode WRITE setThemeMode NOTIFY themeModeChanged)
+    // Arayüz dili: "tr" ya da "en" (ayar yoksa sistem dili; Türkçe değilse İngilizce).
+    Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
     Q_PROPERTY(bool autoMode READ autoMode NOTIFY actionsChanged)
     Q_PROPERTY(QVariantList storeItems READ storeItems NOTIFY storeChanged)
     Q_PROPERTY(bool storeLoading READ storeLoading NOTIFY storeChanged)
@@ -108,6 +110,9 @@ public:
     QVariantMap question() const { return m_question; }
     QString themeMode() const;
     void setThemeMode(const QString &mode);
+    QString language() const;
+    void setLanguage(const QString &lang);
+    static QString resolvedLanguage();
 
     // Chat
     Q_INVOKABLE void submit(const QString &text);
@@ -257,6 +262,7 @@ Q_SIGNALS:
     void questionChanged();
     void promptHistoryChanged();
     void themeModeChanged();
+    void languageChanged();
     void toast(const QString &message);
     void publishingChanged();
     void queueChanged();
