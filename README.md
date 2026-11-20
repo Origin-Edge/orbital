@@ -153,3 +153,7 @@ description: "Kod incelemesi istendiğinde: hataları önem sırasına göre rap
 | Ctrl+L | Mesaj kutusu |
 | Ctrl+, | Ayarlar |
 | Esc | Yanıtı durdur |
+
+## Lisans
+
+MIT. Ayrıntılar için [LICENSE](LICENSE) dosyasına bak. Uygulamayla gelen üçüncü taraf skill ve eklentiler kendi lisanslarını taşır (örneğin `resources/skills/reverse-engineer-anything` MIT).
