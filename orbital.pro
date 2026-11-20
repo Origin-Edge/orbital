@@ -3,7 +3,7 @@ QT       += core gui network quick quickcontrols2 svg multimedia texttospeech
 CONFIG   += c++17
 DEFINES  += QT_NO_KEYWORDS
 # Tek sürüm kaynağı: uygulama, Windows/macOS paket bilgisi ve güncelleme denetimi bunu kullanır.
-ORBITAL_SURUM = 0.6.0
+ORBITAL_SURUM = 0.6.1
 DEFINES  += ORBITAL_SURUM=\\\"$$ORBITAL_SURUM\\\"
 TARGET    = orbital
 TEMPLATE  = app

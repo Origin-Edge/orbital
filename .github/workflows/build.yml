@@ -144,7 +144,7 @@ jobs:
           ./linuxdeploy --appimage-extract-and-run --appdir AppDir --output appimage
           [ -f Orbital-x86_64.AppImage ] || mv Orbital*-x86_64.AppImage Orbital-x86_64.AppImage
           tar -C AppDir -czf orbital-linux-x86_64.tar.gz .
-          scripts/make_deb.sh AppDir "$(sed -n 's/^ *VERSION *= *//p' orbital.pro | head -1)" Orbital-linux-amd64.deb
+          scripts/make_deb.sh AppDir "$(sed -n 's/^ORBITAL_SURUM *= *//p' orbital.pro | head -1)" Orbital-linux-amd64.deb
 
       - name: Smoke test (bundled AppImage, offscreen)
         env:
